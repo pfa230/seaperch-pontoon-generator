@@ -108,6 +108,7 @@ const isClosed = async (stl: Blob) => {
 describe.each([
   ["default", DEFAULTS],
   ["minimum body length", params({ length: minLength(DEFAULTS.diameter) })],
+  ["hole nearest the free end", params({ holeDistance: 1.3 })],
 ] as [string, Params][])("%s pontoon", (_name, p) => {
   test("is one valid hollow solid", () => {
     const pontoon = buildPontoon(p);

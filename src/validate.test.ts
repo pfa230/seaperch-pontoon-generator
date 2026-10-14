@@ -29,10 +29,16 @@ const rules: [string, keyof Params, Partial<Params>, Partial<Params>][] = [
   ],
   ["body too short", "length", { length: 37.1 }, { length: 30 }],
   [
-    "hole not within the mount",
+    "hole touching the free end",
     "holeDistance",
+    { holeDistance: 1.3 },
+    { holeDistance: 1.25 },
+  ],
+  [
+    "hole touching the mount start",
+    "holeDistance",
+    { holeDistance: 23.7 },
     { holeDistance: 23.75 },
-    { holeDistance: 24 },
   ],
   [
     "hole as wide as the mount",

@@ -63,8 +63,8 @@ export function validate(p: Params): Errors {
   if (
     ok("holeDiameter") &&
     ok("holeDistance") &&
-    (p.holeDistance - p.holeDiameter / 2 < 0 ||
-      p.holeDistance + p.holeDiameter / 2 > MOUNT_LENGTH)
+    (p.holeDistance - p.holeDiameter / 2 <= 0 ||
+      p.holeDistance + p.holeDiameter / 2 >= MOUNT_LENGTH)
   ) {
     errors.holeDistance = `The hole must lie within the ${MOUNT_LENGTH} mm mount.`;
   }
