@@ -6,9 +6,9 @@ The team trims each ROV to neutral buoyancy by adding printed pontoons sized fro
 
 ## What Changes
 
-- Add a static web page with a form for pontoon parameters: outer diameter, body length, wall thickness, mount type, mount angle, mount length, screw hole diameter and position, and filament density.
+- Add a static web page with a form for pontoon parameters: outer diameter, body length, wall thickness, mount type, mount angle, fit clearance, screw hole diameter and position, and filament density.
 - Generate a sealed, thin-walled pontoon: a cylinder with a spherical rear end cut flat for the print bed and a spherical front end that tapers to a cone. No wall leans more than 35° from vertical when printed standing on the flat.
-- Add a mount on the nose, coaxial with the body or tilted up to 45°, that fits either inside a 1/2" Schedule 40 PVC pipe or into a 1/2" PVC fitting socket, with a transverse screw hole.
+- Add a mount on the nose, coaxial with the body or tilted up to 45°, that fits either inside a 1/2" Schedule 40 PVC pipe or into a 1/2" PVC fitting socket, with a transverse screw hole. Mount length is a fixed build setting in `src/settings.ts`, 25 mm by default, not a form input.
 - Show displaced volume, estimated print mass and net lift for the current parameters.
 - Download the pontoon as STEP, and as STL.
 - Add the project's build and test commands to the openspec-loop checks.

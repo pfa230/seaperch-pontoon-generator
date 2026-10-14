@@ -7,11 +7,11 @@ A static web page where a user sets pontoon parameters, sees the resulting buoya
 ## ADDED Requirements
 
 ### Requirement: Parameter form
-The page SHALL present a form with these inputs and defaults: outer diameter (32 mm), body length (180 mm), wall thickness (1.2 mm), mount type ("inside pipe" or "into fitting", default "inside pipe"), mount angle (0°), mount length (25 mm), fit clearance (0.2 mm), screw hole diameter (2.5 mm), screw hole distance from mount end (8 mm) and filament density (1.24 g/cm³).
+The page SHALL present a form with these inputs and defaults: outer diameter (32 mm), body length (180 mm), wall thickness (1.2 mm), mount type ("inside pipe" or "into fitting", default "inside pipe"), mount angle (0°), fit clearance (0.2 mm), screw hole diameter (2.5 mm), screw hole distance from mount end (8 mm) and filament density (1.24 g/cm³). Mount length SHALL NOT be a form input; the page SHALL use the fixed mount length build setting, 25 mm by default.
 
 #### Scenario: Page opens with defaults
 - **WHEN** a user opens the page
-- **THEN** the form shows every input above with its default value
+- **THEN** the form shows every input above with its default value, and no mount length input
 
 ### Requirement: Input validation
 While any input breaks a validation rule, the page SHALL mark that input with a message saying why, and SHALL offer no download.
@@ -36,7 +36,7 @@ The page SHALL reject: a non-numeric value; a zero or negative value for any inp
 - **THEN** the page marks the fit clearance input with an error, because the mount diameter would be 0 mm
 
 #### Scenario: Screw hole severs the mount
-- **WHEN** D = 32 mm, mount type is "inside pipe" with the default clearance, mount length is 100 mm, screw hole diameter is 20 mm and its distance from the mount end is 20 mm
+- **WHEN** D = 32 mm, mount type is "inside pipe" with the default clearance, the mount length setting is its 25 mm default, screw hole diameter is 20 mm and its distance from the mount end is 12 mm
 - **THEN** the page marks the screw hole diameter input with an error, because 20 mm is not smaller than the 15.60 mm mount diameter
 
 ### Requirement: Buoyancy readout

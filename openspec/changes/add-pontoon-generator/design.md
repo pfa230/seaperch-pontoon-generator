@@ -27,7 +27,7 @@ Alternatives: three.js or Manifold produce meshes only, so STEP would be impossi
 
 ### App: Vite, TypeScript, plain DOM
 
-The form has ten inputs and three outputs, so a UI framework would add more than it saves. Vite bundles the WebAssembly file and the worker. Vitest runs the tests.
+The form has nine inputs and three outputs, so a UI framework would add more than it saves. Vite bundles the WebAssembly file and the worker. Vitest runs the tests.
 
 ### Geometry runs in a Web Worker
 

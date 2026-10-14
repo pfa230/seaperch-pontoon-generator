@@ -7,8 +7,9 @@
 
 ## 2. Profile math and validation
 
-- [ ] 2.1 Implement `src/profile.ts` for the derived numbers in design.md (sphere centres, flat radius, cone apex, minimum length, mount radius and start point); verify with unit tests for the spec values: 26.2 mm flat at D = 32, about 37.1 mm minimum length at D = 32, 15.60 and 21.14 mm mount diameters, and mount start at about z = 168.86 for the default pipe mount
-- [ ] 2.2 Implement `src/validate.ts` for every arithmetic validation rule in the page spec, returning errors keyed by input; verify with one passing and one failing unit test per rule, including the body-too-short, mount-too-wide, clearance-leaves-no-mount (15.80 mm on an inside-pipe mount) and screw-hole-severs-the-mount scenarios
+- [ ] 2.1 Add `src/settings.ts` with the fixed mount length, 25 mm; verify with a unit test that it is at least the fitting mount's largest radius, 21.34 / 2 mm (zero clearance)
+- [ ] 2.2 Implement `src/profile.ts` for the derived numbers in design.md (sphere centres, flat radius, cone apex, minimum length, mount radius and start point); verify with unit tests for the spec values: 26.2 mm flat at D = 32, about 37.1 mm minimum length at D = 32, 15.60 and 21.14 mm mount diameters, and mount start at about z = 168.86 for the default pipe mount
+- [ ] 2.3 Implement `src/validate.ts` for every arithmetic validation rule in the page spec, reading mount length from `src/settings.ts`, returning errors keyed by input; verify with one passing and one failing unit test per rule, including the body-too-short, mount-too-wide, clearance-leaves-no-mount (15.80 mm on an inside-pipe mount) and screw-hole-severs-the-mount (20 mm hole 12 mm from the end of the 25 mm mount) scenarios
 
 ## 3. Solid model
 
@@ -19,7 +20,7 @@
 ## 4. Page
 
 - [ ] 4.1 Implement `src/worker.ts`, which loads the kernel once, builds models and answers volume, validation and export requests, letting newer requests supersede older ones; verify in the dev server that editing the form during generation stays responsive
-- [ ] 4.2 Build the form with spec defaults, per-input error messages, the buoyancy readout with its solid-walls and fresh-water note, and STEP and STL download buttons with the spec file names, disabled while inputs are invalid; verify in the dev server that the defaults download `pontoon_d32_l180_pipe_a0.step` and `.stl`, and that a 50° angle disables both
+- [ ] 4.2 Build the form with spec defaults and no mount length input, per-input error messages, the buoyancy readout with its solid-walls and fresh-water note, and STEP and STL download buttons with the spec file names, disabled while inputs are invalid; verify in the dev server that the defaults download `pontoon_d32_l180_pipe_a0.step` and `.stl`, that a 50° angle disables both, and that the form has no mount length input
 - [ ] 4.3 Add run and build instructions to README.md; verify the documented commands work from a clean clone
 
 ## 5. Integration

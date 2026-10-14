@@ -50,10 +50,10 @@ The nose SHALL carry a solid cylindrical mount whose outer diameter is set by th
 - **THEN** the mount's outer diameter is 21.14 mm
 
 ### Requirement: Mount root
-The mount's start point SHALL be the point on the body axis where the cone's radius equals the mount's radius r, so a coaxial mount meets the cone flush. The mount SHALL be a cylinder of radius r that starts at the start point and runs along the mount axis, joined to the body by a ball joint: a sphere of radius r centred on the start point. The cylinder's base disc SHALL lie inside the ball joint at every mount angle, so no part of it is exposed. The mount length SHALL be measured from the start point along the mount axis.
+The mount's start point SHALL be the point on the body axis where the cone's radius equals the mount's radius r, so a coaxial mount meets the cone flush. The mount SHALL be a cylinder of radius r that starts at the start point and runs along the mount axis, joined to the body by a ball joint: a sphere of radius r centred on the start point. The cylinder's base disc SHALL lie inside the ball joint at every mount angle, so no part of it is exposed. The mount length SHALL be measured from the start point along the mount axis, and SHALL be one fixed build setting for both mount types, 25 mm by default, never less than the fitting mount's radius.
 
 #### Scenario: Coaxial mount on default body
-- **WHEN** D = 32 mm, L = 180 mm, mount type "inside pipe", default clearance, angle 0° and mount length 25 mm
+- **WHEN** D = 32 mm, L = 180 mm, mount type "inside pipe", default clearance, angle 0° and the default 25 mm mount length setting
 - **THEN** the mount starts at z = 180 − 7.80 / tan 35° ≈ 168.86 mm and ends at z ≈ 193.86 mm, and the ball joint adds no material outside the mount cylinder and the cone
 
 ### Requirement: Mount angle
