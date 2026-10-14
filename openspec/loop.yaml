@@ -12,5 +12,8 @@ attempts:
   proposalReview: 3
   implementation: 3
 checks:
+  - npm ci
+  - npm test
+  - npm run build
   - openspec validate --all --strict --no-interactive
 delivery: pr
