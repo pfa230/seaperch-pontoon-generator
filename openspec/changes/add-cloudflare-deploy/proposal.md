@@ -8,6 +8,7 @@ The pontoon generator builds to static files but has no public home, so students
 
 - Add a GitHub Actions workflow that, on every push to `main`, installs dependencies, runs the tests, builds the page and publishes `dist/` to Cloudflare Pages.
 - Publish nothing when the tests or the build fail.
+- Queue overlapping pushes so each one publishes in order, and never let an older commit overwrite a newer one.
 - Document in the README the one-time Cloudflare setup (Pages project, API token, repository secrets, custom domain) and the public URL.
 
 Out of scope: preview deployments for pull requests, hosting anywhere other than Cloudflare Pages, and making the repository public.
