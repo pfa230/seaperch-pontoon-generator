@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SeaPerch Pontoon Generator</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>SeaPerch Pontoon Generator</h1>
+      <form id="form" novalidate>
+        <label>Outer diameter (mm) <input name="diameter" type="number" step="any" /></label>
+        <label>Body length (mm) <input name="length" type="number" step="any" /></label>
+        <label>Wall thickness (mm) <input name="wall" type="number" step="any" /></label>
+        <label>
+          Mount type
+          <select name="mountType">
+            <option value="pipe">Inside pipe</option>
+            <option value="fitting">Into fitting</option>
+          </select>
+        </label>
+        <label>Mount angle (°) <input name="angle" type="number" step="any" /></label>
+        <label>Fit clearance (mm) <input name="clearance" type="number" step="any" /></label>
+        <label>Screw hole diameter (mm) <input name="holeDiameter" type="number" step="any" /></label>
+        <label>Screw hole distance from mount end (mm) <input name="holeDistance" type="number" step="any" /></label>
+        <label>Filament density (g/cm³) <input name="density" type="number" step="any" /></label>
+      </form>
+      <section>
+        <p id="status"></p>
+        <dl>
+          <dt>Displaced volume</dt><dd id="displaced">–</dd>
+          <dt>Estimated mass</dt><dd id="mass">–</dd>
+          <dt>Net lift</dt><dd id="lift">–</dd>
+        </dl>
+        <p class="note">Mass assumes solid walls (100% infill). Lift assumes fresh water, 1.0 g/mL.</p>
+        <button id="step" type="button" disabled>Download STEP</button>
+        <button id="stl" type="button" disabled>Download STL</button>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
