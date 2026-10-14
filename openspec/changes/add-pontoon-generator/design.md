@@ -63,6 +63,12 @@ Decision (user, after proposal review 1): the mount joins the nose through a sph
 
 Alternatives: limiting the angle to about 30° keeps the backward extension working but narrows the requested range. Dropping the buried-base rule leaves a downward-facing flat stub end outside the nose at large angles.
 
+### Mount length is a site setting
+
+Decision (user, after proposal review 2): mount length is not a form input. It is one fixed value for both mount types, 25 mm by default, kept in `src/settings.ts`, which the maintainer edits and each build bakes in. A unit test asserts the value is at least the larger mount radius (the fitting mount's, about 10.6 mm), so the ball joint always lies inside the cylinder and cone at 0° and no short-mount validation rule is needed. The page spec's form and validation lists drop mount length accordingly.
+
+Alternatives: rejecting user-entered lengths below the mount radius keeps an input nobody needs to tune; allowing them would break the 0° shape guarantee above.
+
 ### Screw-hole clearance is checked on the solid
 
 A tilted mount makes a closed-form distance between the hole and the cavity awkward, and a conservative arithmetic bound rejects valid fitting mounts at large angles. The worker intersects the cavity with the hole cylinder enlarged to radius h + t. A non-zero intersection volume rejects the parameters, with the error shown on the screw hole position input.
