@@ -49,13 +49,19 @@ The pipe and fitting diameters are 1/2" Schedule 40 values: 0.840" outside diame
 ### Solid construction order
 
 1. Revolve the outer profile (flat, rear sphere arc, cylinder, front sphere arc, cone) to get the body.
-2. Fuse the mount: a cylinder through the start point, tilted about the y axis, extended backward by r·tan(angle) + r so its base is buried in the body.
+2. Fuse the mount: a ball joint of radius r centred on the start point, and a cylinder of radius r that starts at that centre and runs along the mount axis, tilted about the y axis. See "Mount root is a ball joint".
 3. Subtract the cavity, which is the outer profile offset inward by t and revolved: inner spheres of radius R − t on the same centres, a cone with the same half-angle, and a floor at z = t. Every inner surface is parallel to an outer one, so it obeys the same 35° limit.
 4. Subtract the screw hole, a cylinder along y.
 
 Subtracting the cavity after the fuse keeps every inner surface a body offset, even where the cavity tip reaches into the mount. The cavity stays sealed because it is at least t inside the body everywhere.
 
 Alternative: fuse the mount after hollowing. That leaves the mount's buried base exposed inside the cavity as a downward-facing face, which breaks the overhang limit.
+
+### Mount root is a ball joint
+
+Decision (user, after proposal review 1): the mount joins the nose through a sphere of the mount's radius r, centred on the mount's start point on the body axis. The mount cylinder starts at the sphere's centre, so its base disc lies inside the sphere for any angle from 0° to 45°, and the 0–45° range stays. The sphere's lower half lies inside the cone, because the cone's radius is at least r everywhere below the start point. Its upper half is outside the body and rounds over the joint on the side away from the tilt. At 0° the sphere lies entirely inside the cylinder and the cone, so a coaxial mount looks the same as without it. Mount length is still measured from the start point along the mount axis. This replaces extending the cylinder backward along its own axis: at 35° or more, that moves the base rim outside the body (16.55 mm off-axis at 45° for the pipe mount on a 32 mm body), so the base can never be fully buried.
+
+Alternatives: limiting the angle to about 30° keeps the backward extension working but narrows the requested range. Dropping the buried-base rule leaves a downward-facing flat stub end outside the nose at large angles.
 
 ### Screw-hole clearance is checked on the solid
 
