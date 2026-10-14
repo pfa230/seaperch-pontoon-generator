@@ -50,18 +50,18 @@ The nose SHALL carry a solid cylindrical mount whose outer diameter is set by th
 - **THEN** the mount's outer diameter is 21.14 mm
 
 ### Requirement: Mount root
-The mount's start point SHALL be the point on the body axis where the cone's radius equals the mount's radius, so a coaxial mount meets the cone flush. The mount length SHALL be measured from that point along the mount axis, and the mount SHALL also extend backward from it far enough that its base lies entirely inside the body.
+The mount's start point SHALL be the point on the body axis where the cone's radius equals the mount's radius r, so a coaxial mount meets the cone flush. The mount SHALL be a cylinder of radius r that starts at the start point and runs along the mount axis, joined to the body by a ball joint: a sphere of radius r centred on the start point. The cylinder's base disc SHALL lie inside the ball joint at every mount angle, so no part of it is exposed. The mount length SHALL be measured from the start point along the mount axis.
 
 #### Scenario: Coaxial mount on default body
 - **WHEN** D = 32 mm, L = 180 mm, mount type "inside pipe", default clearance, angle 0° and mount length 25 mm
-- **THEN** the mount starts at z = 180 − 7.80 / tan 35° ≈ 168.86 mm and ends at z ≈ 193.86 mm
+- **THEN** the mount starts at z = 180 − 7.80 / tan 35° ≈ 168.86 mm and ends at z ≈ 193.86 mm, and the ball joint adds no material outside the mount cylinder and the cone
 
 ### Requirement: Mount angle
 The mount axis SHALL pivot about its start point, tilted from the body axis by a user-set angle from 0° to 45° inclusive. The overhang limit does not apply to the mount: its side leans from vertical by the mount angle.
 
 #### Scenario: Tilted mount
-- **WHEN** the mount angle is 30°
-- **THEN** the angle between the mount's axis and the body axis is 30°, and no part of the mount's base is exposed outside the body
+- **WHEN** the mount angle is 45°
+- **THEN** the angle between the mount's axis and the body axis is 45°, the mount cylinder's base disc lies inside the ball joint, and the ball joint's upper half rounds over the joint on the side away from the tilt
 
 ### Requirement: Screw hole
 The mount SHALL have one cylindrical through-hole for a screw, perpendicular to the mount axis and to the plane containing the body and mount axes, centred on the mount axis at a user-set distance from the mount's free end. The hole SHALL keep at least the wall thickness t of material between itself and the internal cavity.

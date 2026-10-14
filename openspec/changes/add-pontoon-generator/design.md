@@ -81,4 +81,4 @@ Displaced volume is the volume of the solid with the cavity filled: steps 1, 2 a
 - [A mount tilted beyond 35° overhangs on its underside] → The spec states this. The user chose a 0–45° range, and a short 21 mm cylinder usually prints at 45° without support.
 - [The inner cone tip is a 35° overhang printed as a closing point] → This is the shape the user chose, and slicers close small cone tips cleanly.
 - [Real PVC dimensions vary between makers] → The clearance input is the tuning knob. Defaults come from nominal Schedule 40 values, not measurements.
-- [OpenCascade booleans can fail on tangent or coincident faces] → The tilted mount is extended past the surface rather than starting on it, and tests generate the corner cases: angles 0° and 45°, both mount types, and the minimum body length.
+- [OpenCascade booleans can fail on tangent or coincident faces] → The mount cylinder starts at the ball joint's centre inside the body rather than on its surface, and tests generate the corner cases: angles 0° and 45°, both mount types, and the minimum body length.

@@ -8,11 +8,11 @@
 ## 2. Profile math and validation
 
 - [ ] 2.1 Implement `src/profile.ts` for the derived numbers in design.md (sphere centres, flat radius, cone apex, minimum length, mount radius and start point); verify with unit tests for the spec values: 26.2 mm flat at D = 32, about 37.1 mm minimum length at D = 32, 15.60 and 21.14 mm mount diameters, and mount start at about z = 168.86 for the default pipe mount
-- [ ] 2.2 Implement `src/validate.ts` for every arithmetic validation rule in the page spec, returning errors keyed by input; verify with one passing and one failing unit test per rule, including the body-too-short and mount-too-wide scenarios
+- [ ] 2.2 Implement `src/validate.ts` for every arithmetic validation rule in the page spec, returning errors keyed by input; verify with one passing and one failing unit test per rule, including the body-too-short, mount-too-wide, clearance-leaves-no-mount (15.80 mm on an inside-pipe mount) and screw-hole-severs-the-mount scenarios
 
 ## 3. Solid model
 
-- [ ] 3.1 Implement `src/model.ts` to build the body, mount, cavity and screw hole in the order given in design.md; verify with Node tests that the defaults produce one solid whose lowest point is z = 0, whose highest body point is z = 180 before the mount, and whose mount ends at about z = 193.86
+- [ ] 3.1 Implement `src/model.ts` to build the body, mount, cavity and screw hole in the order given in design.md; verify with Node tests that the defaults produce one solid whose lowest point is z = 0, whose highest body point is z = 180 before the mount, and whose mount ends at about z = 193.86; and that both mount types at 45° produce one solid with the mount cylinder's base disc inside the ball joint
 - [ ] 3.2 Add the screw-hole clearance check and the displaced and material volume measurements; verify the default pontoon displaces 135.4 mL and has 24.2 cm³ of material (30.0 g at 1.24 g/cm³), each within 1% of these hand-computed values, and that a hole placed over the cavity is rejected
 - [ ] 3.3 Add STEP and STL export; verify with tests that both mount types at 0° and 45°, and the minimum body length, produce non-empty STEP and STL output without kernel errors
 

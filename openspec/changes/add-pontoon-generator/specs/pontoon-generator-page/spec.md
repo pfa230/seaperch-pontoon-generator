@@ -21,7 +21,7 @@ While any input breaks a validation rule, the page SHALL mark that input with a 
 - **THEN** the page marks the mount angle input with an error and disables both downloads
 
 ### Requirement: Validation rules
-The page SHALL reject: a non-numeric value; a zero or negative value for any input except mount angle and fit clearance; a negative fit clearance; a mount angle outside 0° to 45°; a wall thickness of D/4 or more; a mount diameter above D × cos 35°; a body length too short to fit both ends; a screw hole within t of the cavity; a screw hole not fully between the mount's start point and free end.
+The page SHALL reject: a non-numeric value; a zero or negative value for any input except mount angle and fit clearance; a negative fit clearance; a fit clearance that leaves a mount diameter of zero or less; a mount angle outside 0° to 45°; a wall thickness of D/4 or more; a mount diameter above D × cos 35°; a body length too short to fit both ends; a screw hole within t of the cavity; a screw hole not fully between the mount's start point and free end; a screw hole diameter equal to or larger than the mount diameter.
 
 #### Scenario: Body too short
 - **WHEN** D = 32 mm and the body length is 30 mm
@@ -30,6 +30,14 @@ The page SHALL reject: a non-numeric value; a zero or negative value for any inp
 #### Scenario: Mount too wide for the body
 - **WHEN** D = 24 mm and mount type is "into fitting"
 - **THEN** the page marks the mount type input with an error, because 21.14 mm exceeds 24 × cos 35° ≈ 19.66 mm
+
+#### Scenario: Clearance leaves no mount
+- **WHEN** mount type is "inside pipe" and the fit clearance is 15.80 mm
+- **THEN** the page marks the fit clearance input with an error, because the mount diameter would be 0 mm
+
+#### Scenario: Screw hole severs the mount
+- **WHEN** D = 32 mm, mount type is "inside pipe" with the default clearance, mount length is 100 mm, screw hole diameter is 20 mm and its distance from the mount end is 20 mm
+- **THEN** the page marks the screw hole diameter input with an error, because 20 mm is not smaller than the 15.60 mm mount diameter
 
 ### Requirement: Buoyancy readout
 For valid inputs, the page SHALL show the pontoon's displaced volume in mL, its estimated mass in g as solid material volume times filament density, and its net lift in g as displaced volume times 1.0 g/mL minus mass. The readout SHALL state that the mass assumes solid walls and fresh water.
