@@ -15,7 +15,9 @@ Every push to `main` SHALL start a deployment that installs dependencies from th
 
 #### Scenario: Quick successive merges
 - **WHEN** three commits are pushed to `main` while an earlier deployment is still running
-- **THEN** each commit gets its own deployment, none is cancelled or replaced, they publish in push order, and the public URL ends up serving the newest commit
+- **THEN** each commit gets its own deployment and none is cancelled or replaced
+- **AND** each deployment either publishes or, when a newer commit has already published, succeeds without publishing
+- **AND** no deployment publishes an older commit after a newer one, and the public URL ends up serving the newest commit
 
 ### Requirement: Older commits never overwrite newer ones
 A deployment SHALL NOT publish when a deployment of a newer commit on `main` (one that has the deployment's commit as an ancestor) has already succeeded. Such a deployment SHALL succeed without publishing and SHALL name the newer commit in its log.
