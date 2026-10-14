@@ -1,5 +1,5 @@
 import init from "replicad-opencascadejs";
-import { setOC, type Shape3D } from "replicad";
+import { getOC, setOC, type Shape3D } from "replicad";
 import { beforeAll, describe, expect, test } from "vitest";
 import {
   buildBody,
@@ -90,8 +90,8 @@ describe.each([
   });
 });
 
-test("default STL is closed: every edge joins exactly two facets", async () => {
-  const view = new DataView(await exportPontoon(DEFAULTS, "stl").arrayBuffer());
+const isClosed = async (stl: Blob) => {
+  const view = new DataView(await stl.arrayBuffer());
   const edges = new Map<string, number>();
   for (let n = 0; n < view.getUint32(80, true); n++) {
     const corners = [1, 2, 3].map((v) =>
@@ -102,5 +102,24 @@ test("default STL is closed: every edge joins exactly two facets", async () => {
       edges.set(edge, (edges.get(edge) ?? 0) + 1);
     }
   }
-  expect([...edges.values()].every((count) => count === 2)).toBe(true);
+  return [...edges.values()].every((count) => count === 2);
+};
+
+describe.each([
+  ["default", DEFAULTS],
+  ["minimum body length", params({ length: minLength(DEFAULTS.diameter) })],
+] as [string, Params][])("%s pontoon", (_name, p) => {
+  test("is one valid hollow solid", () => {
+    const pontoon = buildPontoon(p);
+    expect(pontoon.solids).toHaveLength(1);
+    const oc = getOC();
+    expect(new oc.BRepCheck_Analyzer(pontoon.wrapped, true, false, false).IsValid(pontoon.wrapped)).toBe(true);
+    const { displaced, material } = measure(p);
+    expect(material).toBeGreaterThan(0);
+    expect(material).toBeLessThan(displaced);
+  });
+
+  test("STL is closed: every edge joins exactly two facets", async () => {
+    expect(await isClosed(exportPontoon(p, "stl"))).toBe(true);
+  });
 });

@@ -20,12 +20,17 @@ type Vec = [number, number, number];
 const SIN = Math.sin(OVERHANG);
 const COS = Math.cos(OVERHANG);
 
+// Shortest cylinder in mm the outline draws. Shorter ones, such as rounding
+// error at the minimum body length, become sliver faces that split the solid.
+const MIN_SEGMENT = 1e-3;
+
 // Revolves the body outline: a floor at height `floor`, a rear sphere arc,
 // a cylinder, a front sphere arc and a 35° cone. Spheres of radius `radius`
 // sit on the outer body's centres, so an inner outline is an inward offset.
 function revolveOutline(p: Params, radius: number, floor: number): Shape3D {
   const z1 = rearCentre(p.diameter);
-  const z2 = frontCentre(p.diameter, p.length);
+  const front = frontCentre(p.diameter, p.length);
+  const z2 = front - z1 < MIN_SEGMENT ? z1 : front;
   const floorRadius = Math.sqrt(radius ** 2 - (z1 - floor) ** 2);
   const rearMid = Math.atan2(floor - z1, floorRadius) / 2;
   const frontMid = OVERHANG / 2;
@@ -36,7 +41,7 @@ function revolveOutline(p: Params, radius: number, floor: number): Shape3D {
       [radius, z1],
       [radius * Math.cos(rearMid), z1 + radius * Math.sin(rearMid)],
     );
-  if (z2 > z1) pen = pen.vLineTo(z2);
+  if (z2 !== z1) pen = pen.vLineTo(z2);
   return pen
     .threePointsArcTo(
       [radius * COS, z2 + radius * SIN],
