@@ -26,7 +26,7 @@ export interface Preview {
 export function createPreview(container: HTMLElement): Preview {
   let renderer: WebGLRenderer;
   try {
-    renderer = new WebGLRenderer({ antialias: true });
+    renderer = new WebGLRenderer({ antialias: true, alpha: true });
   } catch {
     container.textContent = "3D preview unavailable in this browser.";
     return { show: () => {}, clear: () => {} };
@@ -50,7 +50,7 @@ export function createPreview(container: HTMLElement): Preview {
   camera.add(light, lightTarget);
   scene.add(camera);
 
-  const material = new MeshStandardMaterial({ color: 0x9aa7b0 });
+  const material = new MeshStandardMaterial({ color: 0xffb000 });
   const object = new Mesh(new BufferGeometry(), material);
   object.visible = false;
   scene.add(object);
