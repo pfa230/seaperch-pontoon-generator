@@ -120,6 +120,10 @@ button:disabled {
   text-align: center;
 }
 
+#preview:has(canvas) {
+  padding: 0;
+}
+
 #preview canvas {
   display: block;
 }
