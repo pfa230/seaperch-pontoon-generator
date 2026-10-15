@@ -3,7 +3,7 @@ worktrees: .worktrees
 agents:
   codex: [loop-codex, -s, read-only]
   opus: [loop-claude, --model, opus, --permission-mode, auto]
-  deepseek: [loop-opencode, -m, openrouter/deepseek/deepseek-v4.1-flash]
+  deepseek: [loop-opencode, -m, openrouter/deepseek/deepseek-v4.1-flash, --auto]
 roles:
   proposalReviewer: codex
   planReviser: opus
