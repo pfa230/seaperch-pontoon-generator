@@ -54,6 +54,16 @@ describe("default pontoon", () => {
     expect(Math.abs(material / 25.3 - 1)).toBeLessThan(0.01);
     expect(Math.abs((material * FILAMENT_DENSITY.asa) / 27.1 - 1)).toBeLessThan(0.01);
   });
+
+  test("meshes the whole outer solid from z = 0 to about z = 193.86", () => {
+    const { mesh } = measure(DEFAULTS);
+    const vertexCount = mesh.vertices.length / 3;
+    expect(mesh.triangles.length % 3).toBe(0);
+    expect(Math.max(...mesh.triangles)).toBeLessThan(vertexCount);
+    const zs = Array.from({ length: vertexCount }, (_, i) => mesh.vertices[3 * i + 2]);
+    expect(Math.min(...zs)).toBeCloseTo(0, 2);
+    expect(Math.max(...zs)).toBeCloseTo(193.86, 2);
+  });
 });
 
 describe.each(["pipe", "fitting"] as MountType[])("%s mount at 45°", (mountType) => {

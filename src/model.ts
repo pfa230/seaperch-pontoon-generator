@@ -117,11 +117,29 @@ export function buildPontoon(p: Params): Shape3D {
   return buildOuter(p).cut(buildCavity(p));
 }
 
-// Displaced volume in mL and material volume in cm³.
+export interface ModelMesh {
+  vertices: Float32Array;
+  normals: Float32Array;
+  triangles: Uint32Array;
+}
+
+// Displaced volume in mL, material volume in cm³ and the outer solid as a
+// display mesh. The outer solid is built once and reused for both the volume
+// and the mesh; replicad's booleans leave their inputs intact.
 export function measure(p: Params) {
+  const outer = buildOuter(p);
+  const { vertices, normals, triangles } = outer.mesh({
+    tolerance: 0.1,
+    angularTolerance: 0.1,
+  });
   return {
-    displaced: measureVolume(buildOuter(p)) / 1000,
-    material: measureVolume(buildPontoon(p)) / 1000,
+    displaced: measureVolume(outer) / 1000,
+    material: measureVolume(outer.cut(buildCavity(p))) / 1000,
+    mesh: {
+      vertices: new Float32Array(vertices),
+      normals: new Float32Array(normals),
+      triangles: new Uint32Array(triangles),
+    } satisfies ModelMesh,
   };
 }
 

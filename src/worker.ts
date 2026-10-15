@@ -1,7 +1,7 @@
 import init from "replicad-opencascadejs";
 import wasmUrl from "replicad-opencascadejs/wasm?url";
 import { setOC } from "replicad";
-import { exportPontoon, measure } from "./model";
+import { exportPontoon, measure, type ModelMesh } from "./model";
 import type { Params } from "./profile";
 
 export interface Request {
@@ -12,7 +12,13 @@ export interface Request {
 
 export type Response =
   | { type: "ready" }
-  | { type: "volumes"; id: number; displaced: number; material: number }
+  | {
+      type: "model";
+      id: number;
+      displaced: number;
+      material: number;
+      mesh: ModelMesh;
+    }
   | { type: "file"; id: number; format: "step" | "stl"; file: Blob }
   | { type: "failed"; id: number; message: string };
 
@@ -41,7 +47,7 @@ function run() {
     if (format) {
       post({ type: "file", id, format, file: exportPontoon(params, format) });
     } else {
-      post({ type: "volumes", id, ...measure(params) });
+      post({ type: "model", id, ...measure(params) });
     }
   } catch (error) {
     post({ type: "failed", id, message: String(error) });
