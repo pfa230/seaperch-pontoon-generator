@@ -27,4 +27,4 @@ None.
 ## Impact
 
 - `index.html`, `src/main.ts`, `src/profile.ts`, `src/validate.ts`, `src/model.ts`, `src/worker.ts`, `src/settings.ts` and their tests.
-- Lift for the default pontoon drops by about 1 mL (pipe mount) to 4.5 mL (fitting mount at 45°), because the solid nose grows.
+- With the default ASA/ABS filament, net lift drops by about 1.2 g (pipe mount at 0°) to 6.2 g (fitting mount at 45°), because the solid nose grows by about 1.11 to 5.82 cm³.

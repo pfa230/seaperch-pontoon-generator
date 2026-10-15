@@ -3,7 +3,7 @@
 ## MODIFIED Requirements
 
 ### Requirement: Sealed thin wall
-The body SHALL be hollow with a wall thickness of at least t everywhere and exactly t on its sides, domes and rear floor, and a single closed internal cavity with no opening to the outside. The cavity's top SHALL be a cone with a 35° half-angle on the body axis whose point lies one wall thickness t below the screw hole's lowest point, or the inward offset of the body's cone if that is lower.
+The body SHALL be hollow with a wall thickness of at least t everywhere, and a single closed internal cavity with no opening to the outside. The cavity SHALL be the inward offset of the body by t, with its floor at height t, intersected with a cone with a 35° half-angle on the body axis whose point lies one wall thickness t below the screw hole's lowest point, or at the inward offset's own cone point if that is lower. The wall SHALL be exactly t on the sides, domes and rear floor wherever the cavity follows the inward offset, and thicker where the cone replaces it; for D = 32 mm, L = 180 mm, t = 1.2 mm and the fitting mount at 45°, the side wall at z = 150 mm is about 2.57 mm.
 
 #### Scenario: Cavity is closed
 - **WHEN** a pontoon is generated with any valid parameters

@@ -30,7 +30,9 @@ Decision (user): the hole sits 10 mm from the pipe or fitting edge. The pipe's o
 
 Decision (user, after weighing a fully solid mount at about 7–9 mL of lift): the cavity ends one wall thickness below the hole. The hole's axis is horizontal (along y), so its lowest point is at z_hole = z_start + HOLE_FROM_START·cos(angle) − HOLE_DIAMETER/2. The cavity's top is a cone with a 35° half-angle on the body axis, pointing up, whose point is at min(inner cone point, z_hole − t). The cavity is the existing inward offset of the body intersected with that cone. Where the lower cone meets the inner sphere or cylinder it leaves a crease, but every surface still leans at most 35° from vertical, so the overhang limit holds.
 
-This costs about 1.1 mL of lift on the default pipe mount at 0° and up to about 4.5 mL on a fitting mount at 45°.
+Where the cone cuts below the inner front dome, the wall there is thicker than t: on the fitting mount at 45° the cone reaches the cylinder, and the side wall is about 2.57 mm thick at z = 150 mm and about 4.05 mm where the cylinder meets the front dome.
+
+The cone removes about 1.11 cm³ of cavity on the default pipe mount at 0° and about 5.82 cm³ on a fitting mount at 45°. With the default ASA/ABS filament (1.07 g/cm³), net lift drops by about 1.2 g and 6.2 g; with PETG, the densest choice, by up to 7.4 g. The larger hole in its new position changes lift by under 0.01 g, because it removes displaced volume and material alike.
 
 Alternative: keeping the cavity and the validation check would make the default fitting mount invalid, because the fixed hole sits over the cavity's point.
 
