@@ -6,7 +6,7 @@ Defines how the pontoon generator page reaches its public URL: every change merg
 ## Requirements
 
 ### Requirement: Publish on push to main
-Every push to `main` SHALL start a deployment that installs dependencies from the lockfile, runs the test suite, builds the page and publishes the build output as the production version of the Cloudflare Pages site.
+Every push to `main` SHALL start a deployment that installs dependencies from the lockfile, runs the test suite, builds the page and publishes the build output as the production version of the Cloudflare Worker that serves the site's static assets.
 
 #### Scenario: Merged change goes live
 - **WHEN** a pull request is merged into `main` and its tests and build pass
