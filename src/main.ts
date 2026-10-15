@@ -1,10 +1,12 @@
 import { DEFAULTS, FILAMENT_DENSITY, type Params } from "./profile";
 import { validate, type Errors } from "./validate";
+import { createPreview } from "./preview";
 import type { Request, Response } from "./worker";
 
 const form = document.querySelector<HTMLFormElement>("#form")!;
 const status = document.querySelector<HTMLElement>("#status")!;
 const output = (id: string) => document.querySelector<HTMLElement>(`#${id}`)!;
+const preview = createPreview(document.querySelector<HTMLElement>("#preview")!);
 const buttons = {
   step: document.querySelector<HTMLButtonElement>("#step")!,
   stl: document.querySelector<HTMLButtonElement>("#stl")!,
@@ -73,6 +75,7 @@ function update() {
   const errors = validate(params);
   showErrors(errors);
   showReadout();
+  preview.clear();
   enableDownloads(false);
   if (Object.keys(errors).length > 0) {
     current = null;
@@ -97,8 +100,9 @@ worker.onmessage = (event: MessageEvent<Response>) => {
   if (response.id !== latestId || !current) return;
   status.textContent = "";
   switch (response.type) {
-    case "volumes":
+    case "model":
       showReadout(response);
+      preview.show(response.mesh);
       enableDownloads(true);
       break;
     case "file": {

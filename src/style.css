@@ -26,6 +26,14 @@ select {
   border-color: #b00020;
 }
 
+#preview {
+  aspect-ratio: 1;
+}
+
+#preview canvas {
+  display: block;
+}
+
 .error {
   display: block;
   color: #b00020;
