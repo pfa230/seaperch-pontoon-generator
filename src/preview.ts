@@ -61,18 +61,21 @@ export function createPreview(container: HTMLElement): Preview {
   controls.addEventListener("change", render);
 
   function fit() {
-    object.geometry.computeBoundingSphere();
-    const sphere = object.geometry.boundingSphere;
-    if (!sphere || sphere.radius === 0) return;
+    object.geometry.computeBoundingBox();
+    const box = object.geometry.boundingBox;
+    if (!box || box.isEmpty()) return;
+    const size = box.getSize(new Vector3());
+    const centre = box.getCenter(new Vector3());
+    const radius = Math.hypot(size.y, size.z) / 2;
     const halfFov = (camera.fov * Math.PI) / 360;
     const halfWidthFov = Math.atan(Math.tan(halfFov) * camera.aspect);
-    const distance = sphere.radius / Math.sin(Math.min(halfFov, halfWidthFov));
-    controls.target.copy(sphere.center);
-    camera.position
-      .copy(sphere.center)
-      .addScaledVector(VIEW_DIRECTION, distance);
+    const distance =
+      Math.max((size.x / 2) / Math.tan(halfWidthFov), radius / Math.tan(halfFov)) +
+      radius;
+    controls.target.copy(centre);
+    camera.position.copy(centre).addScaledVector(VIEW_DIRECTION, distance);
     camera.near = Math.max(distance / 100, 0.01);
-    camera.far = distance * 10 + sphere.radius;
+    camera.far = distance * 10 + radius;
     camera.updateProjectionMatrix();
     controls.update();
     render();
@@ -94,6 +97,8 @@ export function createPreview(container: HTMLElement): Preview {
     geometry.setAttribute("position", new BufferAttribute(mesh.vertices, 3));
     geometry.setAttribute("normal", new BufferAttribute(mesh.normals, 3));
     geometry.setIndex(new BufferAttribute(mesh.triangles, 1));
+    geometry.rotateY(-Math.PI / 2);
+    geometry.rotateZ(Math.PI);
     object.geometry.dispose();
     object.geometry = geometry;
     object.visible = true;
