@@ -8,8 +8,8 @@
 ## 2. Viewer
 
 - [ ] 2.1 Add `three@^0.186.1` to dependencies and `@types/three@^0.186.0` to dev dependencies with `npm install`; verify `npm ci` succeeds from the updated lockfile
-- [ ] 2.2 Write `src/preview.ts` with `createPreview(container)` returning `show(mesh)` and `clear()`, the on-demand rendering, `fit()` and the no-WebGL message, as in design.md; verify `npm run build` type-checks
-- [ ] 2.3 Add the `#preview` container and "Reset view" button to `index.html`, its styles to `src/style.css`, and the `show`/`clear`/reset calls to `src/main.ts`. Verify in the dev server each scenario in the spec delta: the default pontoon appears upright and whole, drag rotates, the wheel zooms without scrolling the page, changing the angle to 30° keeps the view, "Reset view" frames a 300 mm pontoon, a 50° angle empties the preview, and with WebGL disabled (Chrome `--disable-webgl`) the unavailable message shows while both downloads still work
+- [ ] 2.2 Write `src/preview.ts` with `createPreview(container)` returning `show(mesh)` and `clear()`, the on-demand rendering, `fit()`, the "Reset view" button calling `fit()` inside this module, and the no-WebGL message, as in design.md; verify `npm run build` type-checks
+- [ ] 2.3 Add the `#preview` container and "Reset view" button to `index.html`, its styles to `src/style.css`, and the `show`/`clear` calls to `src/main.ts`. Verify in the dev server each scenario in the spec delta: the default pontoon appears upright and whole, drag rotates, the wheel zooms without scrolling the page, changing the angle to 30° keeps the view, "Reset view" frames a 300 mm pontoon, a 50° angle empties the preview, and with WebGL disabled (Chrome `--disable-webgl`) the unavailable message shows while both downloads still work
 
 ## 3. Integration
 
