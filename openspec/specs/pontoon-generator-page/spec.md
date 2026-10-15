@@ -57,11 +57,11 @@ The page SHALL reject: a non-numeric outer diameter or length; a zero or negativ
 - **THEN** the page marks the mount type input with an error, because 21.14 mm exceeds 24 × cos 35° ≈ 19.66 mm
 
 ### Requirement: 3D preview
-For valid inputs, the page SHALL show a shaded 3D view of the generated pontoon standing on its flat with the nose up. The user SHALL be able to rotate the view by dragging and zoom by mouse wheel or pinch. A "Reset view" button SHALL frame the whole current pontoon from the starting direction. A new pontoon SHALL replace the shown one without changing the user's rotation or zoom.
+For valid inputs, the page SHALL show a shaded 3D view of the generated pontoon lying horizontally, with the mount on the left and a tilted mount pointing up. The user SHALL be able to rotate the view by dragging and zoom by mouse wheel or pinch. A "Reset view" button SHALL frame the whole current pontoon from the starting direction, as large as it fits in the preview. A new pontoon SHALL replace the shown one without changing the user's rotation or zoom.
 
 #### Scenario: Preview on open
-- **WHEN** a user opens the page and the default pontoon has been generated
-- **THEN** the preview shows the whole pontoon standing upright with its mount at the top
+- **WHEN** a user opens the page in a 1280 × 650 px viewport and the default pontoon has been generated
+- **THEN** the preview shows the whole pontoon lying horizontally with its mount at the left, spanning at least 80% of the preview's width
 
 #### Scenario: Rotate and zoom
 - **WHEN** the user drags across the preview and then scrolls the mouse wheel over it
