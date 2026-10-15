@@ -66,29 +66,31 @@ describe("default pontoon", () => {
   });
 });
 
-describe.each(["pipe", "fitting"] as MountType[])("%s mount at 45°", (mountType) => {
-  test("is one solid with no exposed mount base", () => {
-    const pontoon = buildPontoon(params({ mountType, angle: 45 }));
-    expect(pontoon.solids).toHaveLength(1);
-    const a = Math.SQRT1_2;
-    // Only the rear flat, the cavity floor and the mount's free end are flat.
-    const planes = planarFaces(pontoon);
-    expect(planes).toHaveLength(3);
-    for (const [z, normal] of [
-      [0, [0, 0, -1]],
-      [DEFAULTS.wall, [0, 0, 1]],
-    ] as const) {
-      const plane = planes.find((f) => Math.abs(f.centre[2] - z) < 1e-6);
-      expect(plane?.normal.map((n) => n + 0)).toEqual(normal);
-    }
-    const end = planes.find((f) => f.centre[2] > 100);
-    expect(end?.normal[0]).toBeCloseTo(a, 6);
-    expect(end?.normal[2]).toBeCloseTo(a, 6);
-  });
+describe.each([45, 90] as number[])("%s° mount", (angle) => {
+  const a = (angle * Math.PI) / 180;
+  describe.each(["pipe", "fitting"] as MountType[])("%s", (mountType) => {
+    test("is one solid with no exposed mount base", () => {
+      const pontoon = buildPontoon(params({ mountType, angle }));
+      expect(pontoon.solids).toHaveLength(1);
+      // Only the rear flat, the cavity floor and the mount's free end are flat.
+      const planes = planarFaces(pontoon);
+      expect(planes).toHaveLength(3);
+      for (const [z, normal] of [
+        [0, [0, 0, -1]],
+        [DEFAULTS.wall, [0, 0, 1]],
+      ] as const) {
+        const plane = planes.find((f) => Math.abs(f.centre[2] - z) < 1e-6);
+        expect(plane?.normal.map((n) => n + 0)).toEqual(normal);
+      }
+      const end = planes.find((f) => f.centre[2] > 100);
+      expect(end?.normal[0]).toBeCloseTo(Math.sin(a), 6);
+      expect(end?.normal[2]).toBeCloseTo(Math.cos(a), 6);
+    });
 
-  test("screw hole does not reach the cavity", () => {
-    const p = params({ mountType, angle: 45 });
-    expect(measureVolume(screwHole(p).intersect(buildCavity(p)))).toBe(0);
+    test("screw hole does not reach the cavity", () => {
+      const p = params({ mountType, angle });
+      expect(measureVolume(screwHole(p).intersect(buildCavity(p)))).toBe(0);
+    });
   });
 });
 
@@ -105,8 +107,10 @@ describe.each([
 describe.each([
   ["pipe at 0°", { mountType: "pipe", angle: 0 }],
   ["pipe at 45°", { mountType: "pipe", angle: 45 }],
+  ["pipe at 90°", { mountType: "pipe", angle: 90 }],
   ["fitting at 0°", { mountType: "fitting", angle: 0 }],
   ["fitting at 45°", { mountType: "fitting", angle: 45 }],
+  ["fitting at 90°", { mountType: "fitting", angle: 90 }],
   ["minimum body length", { length: minLength(DEFAULTS.diameter) }],
 ] as [string, Partial<Params>][])("export, %s", (_name, overrides) => {
   test.each(["step", "stl"] as const)("%s is non-empty", (format) => {
@@ -134,6 +138,8 @@ describe.each([
   ["minimum body length", params({ length: minLength(DEFAULTS.diameter) })],
   ["pipe mount at 45°", params({ mountType: "pipe", angle: 45 })],
   ["fitting mount at 45°", params({ mountType: "fitting", angle: 45 })],
+  ["pipe mount at 90°", params({ mountType: "pipe", angle: 90 })],
+  ["fitting mount at 90°", params({ mountType: "fitting", angle: 90 })],
 ] as [string, Params][])("%s pontoon", (_name, p) => {
   test("is one valid hollow solid", () => {
     const pontoon = buildPontoon(p);
