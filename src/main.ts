@@ -115,6 +115,8 @@ worker.onmessage = (event: MessageEvent<Response>) => {
       break;
     }
     case "failed":
+      showReadout();
+      preview.clear();
       status.textContent = `Could not generate this pontoon: ${response.message}`;
       break;
   }
