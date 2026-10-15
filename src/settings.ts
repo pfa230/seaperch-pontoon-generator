@@ -2,3 +2,13 @@
 // Must stay at least the fitting mount's radius so the ball joint lies inside
 // the mount cylinder and the cone at 0°.
 export const MOUNT_LENGTH = 25;
+
+// Fit clearance in mm, taken off the mount's nominal diameter.
+export const FIT_CLEARANCE = 0.2;
+
+// Screw hole diameter in mm, for an M3 screw.
+export const HOLE_DIAMETER = 3.2;
+
+// Distance in mm along the mount from its start point, where the pipe or
+// fitting edge comes to rest, to the screw hole's axis.
+export const HOLE_FROM_START = 10;

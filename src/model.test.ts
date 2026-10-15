@@ -1,14 +1,21 @@
 import init from "replicad-opencascadejs";
-import { getOC, setOC, type Shape3D } from "replicad";
+import { getOC, measureVolume, setOC, type Shape3D } from "replicad";
 import { beforeAll, describe, expect, test } from "vitest";
 import {
   buildBody,
+  buildCavity,
   buildPontoon,
   exportPontoon,
-  holeClearsCavity,
   measure,
+  screwHole,
 } from "./model";
-import { DEFAULTS, minLength, type MountType, type Params } from "./profile";
+import {
+  DEFAULTS,
+  FILAMENT_DENSITY,
+  minLength,
+  type MountType,
+  type Params,
+} from "./profile";
 
 beforeAll(async () => {
   setOC(await init({ print: () => {} }));
@@ -39,11 +46,13 @@ describe("default pontoon", () => {
     expect(high[2]).toBeCloseTo(193.86, 2);
   });
 
-  test("displaces 135.4 mL with 24.2 cm³ of material", () => {
+  // Material is the 24.2 cm³ of t-thick walls plus the 1.1 cm³ of nose the
+  // cavity cap leaves solid below the screw hole.
+  test("displaces 135.4 mL with 25.3 cm³ of material", () => {
     const { displaced, material } = measure(DEFAULTS);
     expect(Math.abs(displaced / 135.4 - 1)).toBeLessThan(0.01);
-    expect(Math.abs(material / 24.2 - 1)).toBeLessThan(0.01);
-    expect(Math.abs((material * DEFAULTS.density) / 30.0 - 1)).toBeLessThan(0.01);
+    expect(Math.abs(material / 25.3 - 1)).toBeLessThan(0.01);
+    expect(Math.abs((material * FILAMENT_DENSITY.asa) / 27.1 - 1)).toBeLessThan(0.01);
   });
 });
 
@@ -66,15 +75,20 @@ describe.each(["pipe", "fitting"] as MountType[])("%s mount at 45°", (mountType
     expect(end?.normal[0]).toBeCloseTo(a, 6);
     expect(end?.normal[2]).toBeCloseTo(a, 6);
   });
+
+  test("screw hole does not reach the cavity", () => {
+    const p = params({ mountType, angle: 45 });
+    expect(measureVolume(screwHole(p).intersect(buildCavity(p)))).toBe(0);
+  });
 });
 
-describe("screw hole clearance", () => {
-  test("default hole clears the cavity", () => {
-    expect(holeClearsCavity(DEFAULTS)).toBe(true);
-  });
-
-  test("hole over the cavity is rejected", () => {
-    expect(holeClearsCavity(params({ holeDistance: 23 }))).toBe(false);
+describe.each([
+  ["pipe", 176.06],
+  ["fitting", 172.1],
+] as [MountType, number][])("%s mount at 0°", (mountType, top) => {
+  test(`cavity stops at about z = ${top}, below the screw hole`, () => {
+    const [, high] = buildCavity(params({ mountType })).boundingBox.bounds;
+    expect(high[2]).toBeCloseTo(top, 2);
   });
 });
 
@@ -108,7 +122,8 @@ const isClosed = async (stl: Blob) => {
 describe.each([
   ["default", DEFAULTS],
   ["minimum body length", params({ length: minLength(DEFAULTS.diameter) })],
-  ["hole nearest the free end", params({ holeDistance: 1.3 })],
+  ["pipe mount at 45°", params({ mountType: "pipe", angle: 45 })],
+  ["fitting mount at 45°", params({ mountType: "fitting", angle: 45 })],
 ] as [string, Params][])("%s pontoon", (_name, p) => {
   test("is one valid hollow solid", () => {
     const pontoon = buildPontoon(p);
