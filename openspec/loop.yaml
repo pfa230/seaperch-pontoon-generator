@@ -3,10 +3,11 @@ worktrees: .worktrees
 agents:
   codex: [loop-codex, -s, read-only]
   opus: [loop-claude, --model, opus, --permission-mode, auto]
+  mimo: [loop-opencode, -m, openrouter/xiaomi/mimo-v2.6-flash]
 roles:
   proposalReviewer: codex
   planReviser: opus
-  implementer: opus
+  implementer: mimo
   implementationReviewer: codex
 attempts:
   proposalReview: 3
