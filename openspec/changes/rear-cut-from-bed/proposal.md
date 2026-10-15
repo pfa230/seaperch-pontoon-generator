@@ -20,10 +20,11 @@ None.
 ### Modified Capabilities
 
 - `pontoon-geometry`: the "Overhang limit" requirement cuts the rear sphere at 35° from the bed instead of 35° from vertical, and exempts the rear sphere's lowest band from the 35° limit.
+- `pontoon-generator-page`: the "Form validation rules" requirement's "Body too short" scenario states the new minimum length, about 41.0 mm at D = 32 mm.
 
 ## Impact
 
 - `src/profile.ts`: `flatRadius`, `rearCentre` and `minLength` use the rear cut angle instead of `OVERHANG`.
-- `src/profile.test.ts`, `src/model.test.ts`: expected flat size, sphere centre, minimum length and volumes.
+- `src/profile.test.ts`, `src/model.test.ts`, `src/validate.test.ts`: expected flat size, sphere centre, minimum length, volumes and the minimum-length error message.
 - The page's minimum-length error message follows `minLength` with no change of its own.
 - No change to the front cone, mount, screw hole, cavity cap, preview or downloads.
