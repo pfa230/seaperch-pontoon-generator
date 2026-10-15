@@ -2,7 +2,7 @@
 
 ## 1. Worker deploy
 
-- [ ] 1.1 Add `wrangler.jsonc` at the repository root with the content in design.md; verify `npx --yes wrangler@4 deploy --dry-run` (run after `npm run build`) reads it, names the Worker `seaperch-pontoon-generator` and lists the files in `dist/` as assets without contacting Cloudflare
+- [ ] 1.1 Add `wrangler.jsonc` at the repository root with the content in design.md; verify the Worker name `seaperch-pontoon-generator` directly in `wrangler.jsonc`, and verify `WRANGLER_LOG=debug npx --yes wrangler@4 deploy --dry-run` (run after `npm run build`) reads it and lists the files in `dist/` as assets without contacting Cloudflare
 - [ ] 1.2 Change the deploy step in `.github/workflows/deploy.yml` to the command `deploy`, leaving every other step unchanged; verify with `git diff` that only that line changed and that the workflow still passes the validator used in the previous change
 
 ## 2. Documentation
