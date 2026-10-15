@@ -28,6 +28,7 @@ select {
 
 #preview {
   aspect-ratio: 1;
+  min-height: 0;
 }
 
 #preview canvas {
