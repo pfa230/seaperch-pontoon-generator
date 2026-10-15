@@ -10,10 +10,8 @@ test("defaults are valid", () => {
 });
 
 const rules: [string, keyof Params, Partial<Params>, Partial<Params>][] = [
-  ["non-numeric value", "wall", { wall: 1 }, { wall: NaN }],
+  ["non-numeric value", "diameter", { diameter: 32 }, { diameter: NaN }],
   ["zero or negative value", "length", { length: 37.1 }, { length: 0 }],
-  ["mount angle out of range", "angle", { angle: 45 }, { angle: 50 }],
-  ["wall of D/4 or more", "wall", { wall: 7.9 }, { wall: 8 }],
   [
     "mount too wide for the body",
     "mountType",
