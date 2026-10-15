@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SeaPerch Pontoon Generator</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600&family=Big+Shoulders:wght@700;800&display=swap"
+    />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
@@ -46,14 +50,25 @@
           </select>
         </label>
       </form>
-      <div id="preview"></div>
-      <button id="reset-view" type="button">Reset view</button>
-      <section>
+      <div class="pool">
+        <div id="preview"></div>
         <p id="status"></p>
+        <button id="reset-view" type="button">Reset view</button>
+      </div>
+      <section>
         <dl>
-          <dt>Displaced volume</dt><dd id="displaced">–</dd>
-          <dt>Estimated mass</dt><dd id="mass">–</dd>
-          <dt>Net lift</dt><dd id="lift">–</dd>
+          <div>
+            <dt>Displaced volume</dt>
+            <dd id="displaced">–</dd>
+          </div>
+          <div>
+            <dt>Estimated mass</dt>
+            <dd id="mass">–</dd>
+          </div>
+          <div>
+            <dt>Net lift</dt>
+            <dd id="lift">–</dd>
+          </div>
         </dl>
         <button id="step" type="button" disabled>Download STEP</button>
         <button id="stl" type="button" disabled>Download STL</button>

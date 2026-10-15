@@ -1,51 +1,251 @@
+:root {
+  --deck: #eef3f2;
+  --lane: #123e5a;
+  --tile: #bfe7ef;
+  --grout: #9dd6e3;
+  --float: #ffb000;
+  --alarm: #c2272d;
+
+  --font-display: "Big Shoulders", "Arial Narrow", sans-serif;
+  --font-body: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+}
+
 body {
-  font-family: system-ui, sans-serif;
   margin: 0;
-  padding: 1rem;
+  background: var(--deck);
+  color: var(--lane);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 400;
 }
 
 main {
-  max-width: 32rem;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  max-width: 40rem;
   margin: 0 auto;
+  padding: 1rem;
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 2.441rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
 }
 
 label {
-  display: block;
-  margin-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 input,
 select {
-  display: block;
-  width: 100%;
   box-sizing: border-box;
-  font: inherit;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.4rem 0.5rem;
+  border: 2px solid color-mix(in srgb, var(--lane) 60%, white);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--lane);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 400;
 }
 
 [aria-invalid="true"] {
-  border-color: #b00020;
+  border-color: var(--alarm);
+}
+
+.error {
+  margin-top: 0.25rem;
+  color: var(--alarm);
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--lane);
+  outline-offset: 2px;
+}
+
+button {
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.pool {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 10px;
+  background-color: var(--tile);
+  background-image:
+    linear-gradient(to right, var(--grout) 2px, transparent 2px),
+    linear-gradient(to bottom, var(--grout) 2px, transparent 2px);
+  background-size: 40px 40px;
 }
 
 #preview {
-  aspect-ratio: 1;
-  min-height: 0;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  text-align: center;
+}
+
+#preview:has(canvas) {
+  padding: 0;
 }
 
 #preview canvas {
   display: block;
 }
 
-.error {
-  display: block;
-  color: #b00020;
+#status {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  max-width: 70%;
+  margin: 0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  background: var(--deck);
+}
+
+#status:empty {
+  display: none;
+}
+
+#reset-view {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  border: 2px solid color-mix(in srgb, var(--lane) 60%, white);
+  background: #fff;
+  color: var(--lane);
+}
+
+section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 dl {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.25rem 1rem;
+  flex: 1 1 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+dl > div {
+  flex: 1 1 6rem;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  background: #fff;
+  text-align: center;
+}
+
+dt {
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 dd {
   margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.953rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+#lift {
+  font-size: 3.052rem;
+}
+
+#step,
+#stl {
+  flex: 1 1 0;
+  background: var(--float);
+  color: var(--lane);
+}
+
+@media (min-width: 56rem) {
+  main {
+    grid-template-columns: 22rem minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto;
+    height: 100dvh;
+    max-width: none;
+  }
+
+  h1 {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  form {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: start;
+  }
+
+  .pool {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    aspect-ratio: auto;
+  }
+
+  section {
+    grid-column: 2;
+    grid-row: 3;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  dl {
+    grid-column: 1;
+    grid-row: 1 / 3;
+  }
+
+  #step {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  #stl {
+    grid-column: 2;
+    grid-row: 2;
+  }
 }
