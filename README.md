@@ -14,7 +14,7 @@ npm run build   # write the static page to dist/
 npm run preview # serve dist/ at http://localhost:4173
 ```
 
-`dist/` is plain static files: copy it to any static web host. Open it through a web server rather than from the file system, because the page loads its CAD kernel in a Web Worker. The mount length is a build setting in `src/settings.ts`.
+`dist/` is plain static files: copy it to any static web host. Open it through a web server rather than from the file system, because the page loads its CAD kernel in a Web Worker. The mount length, fit clearance, screw hole diameter and screw hole position are build settings in `src/settings.ts`.
 
 ## Deployment
 

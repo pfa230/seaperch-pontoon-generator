@@ -1,4 +1,4 @@
-import { DEFAULTS, type Params } from "./profile";
+import { DEFAULTS, FILAMENT_DENSITY, type Params } from "./profile";
 import { validate, type Errors } from "./validate";
 import type { Request, Response } from "./worker";
 
@@ -25,7 +25,7 @@ let current: Params | null = null;
 function readParams(): Params {
   const entries = keys.map((key) => {
     const value = field(key).value;
-    if (key === "mountType") return [key, value];
+    if (key === "mountType" || key === "filament") return [key, value];
     return [key, value.trim() === "" ? NaN : Number(value)];
   });
   return Object.fromEntries(entries);
@@ -51,7 +51,7 @@ function showErrors(errors: Errors) {
 function showReadout(volumes?: { displaced: number; material: number }) {
   const text = (value: number, unit: string) =>
     volumes ? `${value.toFixed(1)} ${unit}` : "–";
-  const mass = volumes ? volumes.material * current!.density : 0;
+  const mass = volumes ? volumes.material * FILAMENT_DENSITY[current!.filament] : 0;
   const displaced = volumes?.displaced ?? 0;
   output("displaced").textContent = text(displaced, "mL");
   output("mass").textContent = text(mass, "g");
@@ -97,10 +97,6 @@ worker.onmessage = (event: MessageEvent<Response>) => {
   if (response.id !== latestId || !current) return;
   status.textContent = "";
   switch (response.type) {
-    case "invalid":
-      showErrors({ holeDistance: response.message });
-      status.textContent = "Fix the marked inputs.";
-      break;
     case "volumes":
       showReadout(response);
       enableDownloads(true);

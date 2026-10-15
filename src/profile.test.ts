@@ -23,10 +23,10 @@ test("minimum length is about 37.1 mm at D = 32", () => {
 });
 
 test("mount diameters with the default clearance", () => {
-  expect(mountDiameter("pipe", 0.2)).toBeCloseTo(15.6, 9);
-  expect(mountDiameter("fitting", 0.2)).toBeCloseTo(21.14, 9);
+  expect(mountDiameter("pipe")).toBeCloseTo(15.6, 9);
+  expect(mountDiameter("fitting")).toBeCloseTo(21.14, 9);
 });
 
 test("default pipe mount starts at about z = 168.86", () => {
-  expect(mountStart(180, mountDiameter("pipe", 0.2) / 2)).toBeCloseTo(168.86, 2);
+  expect(mountStart(180, mountDiameter("pipe") / 2)).toBeCloseTo(168.86, 2);
 });

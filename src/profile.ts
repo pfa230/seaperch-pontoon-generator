@@ -1,4 +1,7 @@
+import { FIT_CLEARANCE } from "./settings";
+
 export type MountType = "pipe" | "fitting";
+export type Filament = "pla" | "petg" | "asa";
 
 export interface Params {
   diameter: number;
@@ -6,10 +9,7 @@ export interface Params {
   wall: number;
   mountType: MountType;
   angle: number;
-  clearance: number;
-  holeDiameter: number;
-  holeDistance: number;
-  density: number;
+  filament: Filament;
 }
 
 export const DEFAULTS: Params = {
@@ -18,10 +18,14 @@ export const DEFAULTS: Params = {
   wall: 1.2,
   mountType: "pipe",
   angle: 0,
-  clearance: 0.2,
-  holeDiameter: 2.5,
-  holeDistance: 8,
-  density: 1.24,
+  filament: "asa",
+};
+
+// Density in g/cm³. ASA/ABS uses ASA's; ABS is about 1.04.
+export const FILAMENT_DENSITY: Record<Filament, number> = {
+  pla: 1.24,
+  petg: 1.27,
+  asa: 1.07,
 };
 
 // 1/2" Schedule 40 PVC: nominal inside diameter (0.622") for a mount inside
@@ -46,8 +50,8 @@ export const frontCentre = (diameter: number, length: number) =>
 export const minLength = (diameter: number) =>
   (diameter / 2) * (SIN + 1 / SIN);
 
-export const mountDiameter = (mountType: MountType, clearance: number) =>
-  MOUNT_BASE_DIAMETER[mountType] - clearance;
+export const mountDiameter = (mountType: MountType) =>
+  MOUNT_BASE_DIAMETER[mountType] - FIT_CLEARANCE;
 
 // Height on the body axis where the cone's radius equals the mount radius.
 export const mountStart = (length: number, mountRadius: number) =>

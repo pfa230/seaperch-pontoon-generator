@@ -21,10 +21,14 @@
           </select>
         </label>
         <label>Mount angle (°) <input name="angle" type="number" step="any" /></label>
-        <label>Fit clearance (mm) <input name="clearance" type="number" step="any" /></label>
-        <label>Screw hole diameter (mm) <input name="holeDiameter" type="number" step="any" /></label>
-        <label>Screw hole distance from mount end (mm) <input name="holeDistance" type="number" step="any" /></label>
-        <label>Filament density (g/cm³) <input name="density" type="number" step="any" /></label>
+        <label>
+          Filament
+          <select name="filament">
+            <option value="pla">PLA</option>
+            <option value="petg">PETG</option>
+            <option value="asa">ASA/ABS</option>
+          </select>
+        </label>
       </form>
       <section>
         <p id="status"></p>
@@ -33,7 +37,6 @@
           <dt>Estimated mass</dt><dd id="mass">–</dd>
           <dt>Net lift</dt><dd id="lift">–</dd>
         </dl>
-        <p class="note">Mass assumes solid walls (100% infill). Lift assumes fresh water, 1.0 g/mL.</p>
         <button id="step" type="button" disabled>Download STEP</button>
         <button id="stl" type="button" disabled>Download STL</button>
       </section>

@@ -3,6 +3,7 @@ import {
   makeCylinder,
   makeSphere,
   measureVolume,
+  type Drawing,
   type Shape3D,
 } from "replicad";
 import {
@@ -13,21 +14,22 @@ import {
   rearCentre,
   type Params,
 } from "./profile";
-import { MOUNT_LENGTH } from "./settings";
+import { HOLE_DIAMETER, HOLE_FROM_START, MOUNT_LENGTH } from "./settings";
 
 type Vec = [number, number, number];
 
 const SIN = Math.sin(OVERHANG);
 const COS = Math.cos(OVERHANG);
+const TAN = Math.tan(OVERHANG);
 
 // Shortest cylinder in mm the outline draws. Shorter ones, such as rounding
 // error at the minimum body length, become sliver faces that split the solid.
 const MIN_SEGMENT = 1e-3;
 
-// Revolves the body outline: a floor at height `floor`, a rear sphere arc,
-// a cylinder, a front sphere arc and a 35° cone. Spheres of radius `radius`
-// sit on the outer body's centres, so an inner outline is an inward offset.
-function revolveOutline(p: Params, radius: number, floor: number): Shape3D {
+// The body outline: a floor at height `floor`, a rear sphere arc, a cylinder,
+// a front sphere arc and a 35° cone. Spheres of radius `radius` sit on the
+// outer body's centres, so an inner outline is an inward offset.
+function outline(p: Params, radius: number, floor: number): Drawing {
   const z1 = rearCentre(p.diameter);
   const front = frontCentre(p.diameter, p.length);
   const z2 = front - z1 < MIN_SEGMENT ? z1 : front;
@@ -48,13 +50,14 @@ function revolveOutline(p: Params, radius: number, floor: number): Shape3D {
       [radius * Math.cos(frontMid), z2 + radius * Math.sin(frontMid)],
     )
     .lineTo([0, z2 + radius / SIN])
-    .close()
-    .sketchOnPlane("XZ")
-    .revolve() as Shape3D;
+    .close();
 }
 
+const revolve = (drawing: Drawing) =>
+  drawing.sketchOnPlane("XZ").revolve() as Shape3D;
+
 function mountAxis(p: Params) {
-  const r = mountDiameter(p.mountType, p.clearance) / 2;
+  const r = mountDiameter(p.mountType) / 2;
   const a = (p.angle * Math.PI) / 180;
   return {
     radius: r,
@@ -63,28 +66,43 @@ function mountAxis(p: Params) {
   };
 }
 
-function screwHole(p: Params, radius: number): Shape3D {
+// Point where the screw hole's axis crosses the mount axis.
+function holeCentre(p: Params): Vec {
   const { start, direction } = mountAxis(p);
-  const along = MOUNT_LENGTH - p.holeDistance;
+  return [
+    start[0] + HOLE_FROM_START * direction[0],
+    0,
+    start[2] + HOLE_FROM_START * direction[2],
+  ];
+}
+
+export function screwHole(p: Params): Shape3D {
+  const [x, , z] = holeCentre(p);
   const halfLength = p.diameter / 2 + 1;
   return makeCylinder(
-    radius,
+    HOLE_DIAMETER / 2,
     2 * halfLength,
-    [
-      start[0] + along * direction[0],
-      -halfLength,
-      start[2] + along * direction[2],
-    ],
+    [x, -halfLength, z],
     [0, 1, 0],
   );
 }
 
 export function buildBody(p: Params): Shape3D {
-  return revolveOutline(p, p.diameter / 2, 0);
+  return revolve(outline(p, p.diameter / 2, 0));
 }
 
-function buildCavity(p: Params): Shape3D {
-  return revolveOutline(p, p.diameter / 2 - p.wall, p.wall);
+// The inward offset of the body, capped by a 35° cone on the body axis whose
+// point is t below the screw hole's lowest point. Where the offset's own cone
+// point is lower, the cap contains the whole offset and changes nothing. The
+// cap is cut from the outline before revolving, because the kernel's solid
+// intersection of the two returns nothing.
+export function buildCavity(p: Params): Shape3D {
+  const tip = holeCentre(p)[2] - HOLE_DIAMETER / 2 - p.wall;
+  const cap = draw([-tip * TAN, 0])
+    .hLineTo(tip * TAN)
+    .lineTo([0, tip])
+    .close();
+  return revolve(outline(p, p.diameter / 2 - p.wall, p.wall).intersect(cap));
 }
 
 // Body and mount with the screw hole, before hollowing.
@@ -92,17 +110,11 @@ function buildOuter(p: Params): Shape3D {
   const { radius, start, direction } = mountAxis(p);
   const ball = makeSphere(radius).translate(start);
   const mount = makeCylinder(radius, MOUNT_LENGTH, start, direction);
-  return buildBody(p).fuse(ball).fuse(mount).cut(screwHole(p, p.holeDiameter / 2));
+  return buildBody(p).fuse(ball).fuse(mount).cut(screwHole(p));
 }
 
 export function buildPontoon(p: Params): Shape3D {
   return buildOuter(p).cut(buildCavity(p));
-}
-
-// True when at least t of material separates the screw hole from the cavity.
-export function holeClearsCavity(p: Params): boolean {
-  const zone = screwHole(p, p.holeDiameter / 2 + p.wall).intersect(buildCavity(p));
-  return measureVolume(zone) === 0;
 }
 
 // Displaced volume in mL and material volume in cm³.
