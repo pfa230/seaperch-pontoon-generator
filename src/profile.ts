@@ -36,19 +36,21 @@ export const MOUNT_BASE_DIAMETER: Record<MountType, number> = {
 };
 
 export const OVERHANG = (35 * Math.PI) / 180;
+const REAR_CUT = (55 * Math.PI) / 180;
 const SIN = Math.sin(OVERHANG);
-const COS = Math.cos(OVERHANG);
 const TAN = Math.tan(OVERHANG);
+const REAR_SIN = Math.sin(REAR_CUT);
+const REAR_COS = Math.cos(REAR_CUT);
 
-export const flatRadius = (diameter: number) => (diameter / 2) * COS;
+export const flatRadius = (diameter: number) => (diameter / 2) * REAR_COS;
 
-export const rearCentre = (diameter: number) => (diameter / 2) * SIN;
+export const rearCentre = (diameter: number) => (diameter / 2) * REAR_SIN;
 
 export const frontCentre = (diameter: number, length: number) =>
   length - diameter / 2 / SIN;
 
 export const minLength = (diameter: number) =>
-  (diameter / 2) * (SIN + 1 / SIN);
+  (diameter / 2) * (REAR_SIN + 1 / SIN);
 
 export const mountDiameter = (mountType: MountType) =>
   MOUNT_BASE_DIAMETER[mountType] - FIT_CLEARANCE;

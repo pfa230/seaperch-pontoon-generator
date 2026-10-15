@@ -20,11 +20,11 @@ The body SHALL be a solid of revolution of outer diameter D: a cylinder joined t
 - **THEN** the body's maximum diameter is 32 mm and its highest point on the axis, before the mount is added, is at z = 180 mm
 
 ### Requirement: Overhang limit
-No outer or inner surface of the body SHALL lean more than 35° from vertical, measured with the model standing on its flat. The rear sphere SHALL be cut at the latitude where its surface reaches 35° from vertical, and the front cone SHALL have a 35° half-angle.
+No outer or inner surface of the body SHALL lean more than 35° from vertical, measured with the model standing on its flat, except the outer and inner rear sphere surfaces more than 35° below the rear sphere's equator. The rear sphere SHALL be cut at the latitude where its outer surface makes 35° with the print bed, which is 55° from vertical, and the front cone SHALL have a 35° half-angle.
 
 #### Scenario: Rear flat size
 - **WHEN** D = 32 mm
-- **THEN** the rear flat is a disc of diameter 32 × cos 35° ≈ 26.2 mm
+- **THEN** the rear flat is a disc of diameter 32 × sin 35° ≈ 18.35 mm, and the rear sphere's centre is at z = 16 × cos 35° ≈ 13.11 mm
 
 #### Scenario: Front cone
 - **WHEN** D = 32 mm

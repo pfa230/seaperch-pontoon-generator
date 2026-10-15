@@ -46,13 +46,13 @@ describe("default pontoon", () => {
     expect(high[2]).toBeCloseTo(193.86, 2);
   });
 
-  // Material is the 24.2 cm³ of t-thick walls plus the 1.1 cm³ of nose the
+  // Material is the 23.9 cm³ of t-thick walls plus the 1.1 cm³ of nose the
   // cavity cap leaves solid below the screw hole.
-  test("displaces 135.4 mL with 25.3 cm³ of material", () => {
+  test("displaces 133.9 mL with 25.0 cm³ of material", () => {
     const { displaced, material } = measure(DEFAULTS);
-    expect(Math.abs(displaced / 135.4 - 1)).toBeLessThan(0.01);
-    expect(Math.abs(material / 25.3 - 1)).toBeLessThan(0.01);
-    expect(Math.abs((material * FILAMENT_DENSITY.asa) / 27.1 - 1)).toBeLessThan(0.01);
+    expect(Math.abs(displaced / 133.9 - 1)).toBeLessThan(0.01);
+    expect(Math.abs(material / 25.0 - 1)).toBeLessThan(0.01);
+    expect(Math.abs((material * FILAMENT_DENSITY.asa) / 26.7 - 1)).toBeLessThan(0.01);
   });
 
   test("meshes the whole outer solid from z = 0 to about z = 193.86", () => {

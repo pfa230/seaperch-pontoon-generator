@@ -11,14 +11,14 @@ test("defaults are valid", () => {
 
 const rules: [string, keyof Params, Partial<Params>, Partial<Params>][] = [
   ["non-numeric value", "diameter", { diameter: 32 }, { diameter: NaN }],
-  ["zero or negative value", "length", { length: 37.1 }, { length: 0 }],
+  ["zero or negative value", "length", { length: 41.1 }, { length: 0 }],
   [
     "mount too wide for the body",
     "mountType",
     { diameter: 24, mountType: "pipe" },
     { diameter: 24, mountType: "fitting" },
   ],
-  ["body too short", "length", { length: 37.1 }, { length: 30 }],
+  ["body too short", "length", { length: 41.1 }, { length: 30 }],
 ];
 
 describe.each(rules)("%s", (_name, key, passing, failing) => {
@@ -31,7 +31,7 @@ describe.each(rules)("%s", (_name, key, passing, failing) => {
 });
 
 test("body-too-short error states the minimum length", () => {
-  expect(check({ length: 30 }).length).toContain("37.1 mm");
+  expect(check({ length: 30 }).length).toContain("41.0 mm");
 });
 
 test("fitting mount on D = 24 is rejected on the mount type", () => {
