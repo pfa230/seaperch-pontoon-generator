@@ -121,23 +121,13 @@ function buildMount(p: Params): Shape3D {
   );
 }
 
-// The inward offset of the rounded body, including its tangent nose sphere.
-// At 0°, 30° and 45° the cavity continues into the wider lower mount and closes
-// one wall thickness before the shoulder; at 60° and 90° both mount cylinders
-// are excluded so the lower mount stays solid.
+// The inward offset of the rounded body is the sole cavity, including its
+// tangent nose cap. Its shape does not depend on the mount angle. The final
+// subtraction from the body/mount union leaves all mount material outside this
+// cavity solid, so the cavity may overlap either nominal mount cylinder; at
+// least one wall still separates it from the actual exterior and screw hole.
 export function buildCavity(p: Params): Shape3D {
-  const r = jointDiameter(p.mountType) / 2;
-  const body = roundedBody(p, p.wall);
-
-  if (p.angle > 45) return body.cut(buildMount(p));
-
-  const { start, direction } = mountAxis(p);
-  const shoulder = along(start, direction, seating(p));
-  const voidSolid = makeCylinder(r - p.wall, seating(p) - p.wall, start, direction);
-  const beyond = makeCylinder(1000, 1000, along(shoulder, direction, -p.wall), direction);
-  // Clip the rounded body first: cutting the fused void can leave a spherical
-  // sliver past the closure at 45°. The tube already ends at the closure plane.
-  return body.cut(beyond).fuse(voidSolid);
+  return roundedBody(p, p.wall);
 }
 
 // Body and mount with the screw hole, before hollowing.
