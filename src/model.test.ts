@@ -104,6 +104,29 @@ const sectionFaces = (shape: Shape3D) =>
       Math.abs(Math.abs(face.normalAt().y) - 1) < 1e-6,
   );
 
+// Probes for the inner nose cap in the section plane Y = 0 through the pivot,
+// from the 55° cone tangent join on one side, over the pole, to the join on the
+// other. The cavity surface is the sphere of radius r about the pivot. After
+// the half-section cut, any material in that plane lies on the half's
+// boundary, so a void point PROBE_OFFSET inside the sphere is exactly that far
+// from the half and a wall point PROBE_OFFSET outside it is on the half, even
+// at the thinnest offered wall (0.8 mm).
+const PROBE_OFFSET = 0.2;
+
+const distanceTo = (shape: Shape3D, point: Vec) => measureDistanceBetween(makeVertex(point), shape);
+
+const noseProbes = (p: Params, r: number) => {
+  const c: Vec = [0, 0, mountStart(p.length, jointDiameter(p.mountType) / 2)];
+  const directions = [-55, -52, -30, -8, 0, 8, 30, 52, 55].map((degrees): Vec => {
+    const theta = (degrees * Math.PI) / 180;
+    return [Math.sin(theta), 0, Math.cos(theta)];
+  });
+  return {
+    void: directions.map((unit) => along(c, unit, r - PROBE_OFFSET)),
+    wall: directions.map((unit) => along(c, unit, r + PROBE_OFFSET)),
+  };
+};
+
 describe.each(["pipe", "fitting"] as MountType[])("%s rounded nose", (mountType) => {
   test("has body sphere, tangent cone and enlarged spherical sector", () => {
     const body = buildBody(params({ mountType }));
@@ -359,6 +382,20 @@ describe.each([0, 30, 45, 60, 90] as number[])("%s° cross-section", (angle) => 
       expect(measureVolume(half) / measureVolume(pontoon)).toBeCloseTo(0.5, 4);
       const sections = sectionFaces(half);
       expect(sections.some((face) => face.innerWires().length > 0)).toBe(true);
+    });
+
+    test.each([0.8, 1.2, 1.6])("shows the whole inner nose cap around the finished nose, t = %s", (wall) => {
+      const q = params({ mountType, angle, wall });
+      const pontoon = buildPontoon(q);
+      const r = jointDiameter(mountType) / 2 - wall;
+      const probes = noseProbes(q, r);
+      // Unturned, the section holds the side beneath the mount and the side
+      // opposite it; turned 90° about the body axis, it holds the two flanks.
+      for (const turn of [0, -90]) {
+        const half = cutAwayHalf(pontoon.clone().rotate(turn, [0, 0, 0], [0, 0, 1]));
+        for (const point of probes.void) expect(distanceTo(half, point)).toBeCloseTo(PROBE_OFFSET, 6);
+        for (const point of probes.wall) expect(distanceTo(half, point)).toBeLessThan(1e-6);
+      }
     });
   });
 });
