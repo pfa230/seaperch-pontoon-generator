@@ -30,7 +30,7 @@ In `src/preview.ts`, retain the two current display geometries and swap the sing
 
 ### Use a native checkbox beside Reset view
 
-Add a labelled, unchecked checkbox beside the existing preview controls and outside the parameter form. Connect its change event to the preview toggle method; do not add it to `Params`, worker requests or validation. Keep its selection when generation clears/replaces the meshes and when Reset view is pressed. A page reload starts unchecked. These session defaults and retaining the half away from the starting camera are minor presentation assumptions.
+Add a labelled, unchecked checkbox beside the existing preview controls and outside the parameter form. Connect its change event to the preview toggle method; do not add it to `Params`, worker requests or validation. Keep its selection when generation clears/replaces the meshes and when Reset view is pressed. Set the checkbox to unchecked in `src/main.ts` at startup so a page reload starts unchecked. These session defaults and retaining the half away from the starting camera are minor presentation assumptions.
 
 Use scoped CSS for the checkbox and control placement, preserving the native keyboard behavior and existing focus indicator. Check that the controls do not overlap the generation status at laptop and phone widths. No visual redesign or new UI dependency is required.
 

@@ -2,7 +2,7 @@
 
 ## 1. Generate the section mesh
 
-- [ ] 1.1 In `src/model.ts`, reuse the completed hollow solid for material volume and a Y >= 0 half-solid, meshing its true section faces with the existing preview tolerances; add `sectionMesh` to the worker model response. Extend `src/model.test.ts` to verify the retained half, cut faces, cavity and half-material volume for both mounts and all offered angles, including representative thin/thick walls; verify existing full-model volume, mesh and export tests still pass with `npm test`.
+- [ ] 1.1 In `src/model.ts`, reuse the completed hollow solid for material volume and cut it to a Y >= 0 half-solid, then mesh that half (with its true section faces) using the existing preview tolerances; add `sectionMesh` to the worker model response. Extend `src/model.test.ts` to verify the retained half, cut faces, cavity and half-material volume for both mounts and all offered angles, including representative thin/thick walls; verify existing full-model volume, mesh and export tests still pass with `npm test`.
 
 ## 2. Connect the preview control
 
@@ -11,4 +11,4 @@
 
 ## 3. Verify the integrated behavior
 
-- [ ] 3.1 Run `npm test` and `npm run build`; exercise toggles while generating, during invalid inputs and after generation failure, plus the no-WebGL path. Verify readouts remain those of the complete model and STEP/STL downloads contain the complete hollow pontoon with either checkbox setting, recording the checks performed.
+- [ ] 3.1 Run `npm test` and `npm run build`; exercise toggles while generating, during invalid inputs and after generation failure, plus the no-WebGL path. Verify readouts remain those of the complete model and STEP/STL downloads contain the complete hollow pontoon with either checkbox setting.
