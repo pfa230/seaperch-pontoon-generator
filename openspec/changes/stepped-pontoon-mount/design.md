@@ -43,7 +43,11 @@ At 0°, the pipe's bore edge meets the enlarged spherical cap: s = sqrt(R² − 
 
 ### Hollow only the lower-angle joint
 
-Retain the existing inward-offset body cavity and its 35° roof away from the joint, updating the nose radius. At 0°, 30° and 45°, connect that cavity to a cylindrical void of radius R − t inside the wider cylinder. Close the void at least t before the shoulder and trim the entire cavity there, so the old body cavity cannot intrude into the insertion peg through the rounded nose. The mount's inner surfaces share its existing exemption from the body overhang limit.
+The user's section boundaries govern hollowing: the diameter d + 4 mm section is hollow at 0°, 30° and 45°, solid at 60° and 90°, and the entire 20 mm insertion peg is solid apart from its screw hole. Remove the old screw-hole-height limit on the body cavity; it must not fill a section specified as hollow.
+
+Retain the inward-offset body cavity and its 35° roof away from the joint. Put that roof cone's point on the body axis at z = c + R − t at every mount angle, one wall thickness below the enlarged rounded tip, independently of the screw hole. For the default pipe body at 60° or 90° and t = 1.2 mm, this reference is z ≈ 171.51 mm. The mount exclusions below still make both mount cylinders solid at those angles without filling unrelated body volume.
+
+At 0°, 30° and 45°, connect the body cavity to a cylindrical void of radius R − t inside the wider cylinder. This continuation is not capped by the body-roof cone or by screw-hole height. Close the void at least t before the shoulder and trim the entire cavity there, so the body cavity cannot intrude into the insertion peg through the rounded nose. The mount's inner surfaces share its existing exemption from the body overhang limit.
 
 At 60° and 90°, omit that void and exclude both mount cylinders from the body cavity. This makes the lower mount solid without filling unrelated portions of the pontoon body. Do not merely stop adding a bore: the existing body cavity could otherwise cut into the embedded mount. In both cases preserve one connected sealed cavity, t of separation from the exterior and hole, and the full 20 mm solid peg apart from its through-hole. Thicker material at the joint and cavity closure is expected.
 
@@ -62,13 +66,14 @@ Revise the current profile/validation tests for the enlarged sphere and diameter
 
 Contract references below mean `openspec/specs/pontoon-geometry/spec.md` (G) or `openspec/specs/pontoon-generator-page/spec.md` (P), as amended by this change. This audit serves the repository's explicit cut-pass instruction.
 
-Cut from the plan: runtime 3D collision shapes/intersections (the user requires 2D trigonometry); the old nominal screw-reference correction (it gives the wrong shoulder spacing); the old 25 mm pivot-length constraint (it does not provide a fixed 20 mm peg). No new inputs, persisted state, caches, dependencies, solver settings or separate verification workflow are introduced.
+Cut from the plan: runtime 3D collision shapes/intersections (the user requires 2D trigonometry); the old nominal screw-reference correction (it gives the wrong shoulder spacing); the old 25 mm pivot-length constraint (it does not provide a fixed 20 mm peg); the screw-hole-height body-cavity limit (it can fill material contrary to the specified hollow section). No new inputs, persisted state, caches, dependencies, solver settings or separate verification workflow are introduced.
 
 | Kept item | Contract or explicit request | Simpler version and its concrete failure |
 | --- | --- | --- |
 | Per-type diameter selection | G: Mount type; user's second correction | One shared diameter makes either the pipe or fitting mount the wrong size. |
 | Derived lower-cylinder/nose radius R | G: Body shape, Mount root | Keeping the old radius omits the requested 4 mm increase. |
 | Derived tangent-sphere pivot c | G: Mount root | Keeping the old pivot breaks tangency with the enlarged sphere. |
+| Explicit d + 4 mm cap in the overhang exception | G: Overhang limit | The old "mount-sized" wording ambiguously refers to two different mount diameters. |
 | Derived seating distance s | G: Pipe and fitting seating | A fixed distance leaves interference or unnecessary spacing at some angles. |
 | 2D line/arc contact formulas | User's first correction; G: Pipe and fitting seating | Checking just the cone misses sphere contacts and profile transitions. |
 | Both mirrored profile sides and wall radii | G: Pipe and fitting seating | One side or just the bore misses the limiting wall contact at tilted angles. |
@@ -78,6 +83,7 @@ Cut from the plan: runtime 3D collision shapes/intersections (the user requires 
 | Hollow continuation at 0°/30°/45° | G: Sealed thin wall; user's corrected cutoff | A solid lower cylinder adds material where the user requires hollowing. |
 | Solid lower cylinder at 60°/90° | G: Sealed thin wall; user's corrected cutoff | Always hollowing violates the requested cutoff. |
 | Cavity closure and peg exclusion | G: Sealed thin wall, Screw hole | Merely extending the old cavity can hollow the peg or expose the cavity. |
+| Body-roof point c + R − t, independent of the screw hole | G: Sealed thin wall; user's section-boundary clarification | Use the enlarged nose tip directly; carrying over the hole-height term adds an unrelated filling constraint. |
 | Enlarged-nose size validation | P: Form validation rules | Checking only the peg accepts an oversized nose. |
 | Analytic dimension/contact tests | G: Body shape, Mount root, Pipe and fitting seating | Checking only 0° misses angle-dependent contacts and diameter selection. |
 | Independent CAD contact checks in tests | G: Pipe and fitting seating | Reusing only the placement formula as its own oracle can conceal a geometric error. |
