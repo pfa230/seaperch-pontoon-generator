@@ -22,7 +22,6 @@ type Vec = [number, number, number];
 
 const SIN = Math.sin(OVERHANG);
 const COS = Math.cos(OVERHANG);
-const TAN = Math.tan(OVERHANG);
 
 // Shortest cylinder in mm the outline draws. Shorter ones, such as rounding
 // error at the minimum body length, become sliver faces that split the solid.
@@ -89,12 +88,15 @@ export function screwHole(p: Params): Shape3D {
   );
 }
 
-export function buildBody(p: Params): Shape3D {
-  const r = jointDiameter(p.mountType) / 2;
-  const centre = mountStart(p.length, r);
+// Outer body or its inward offset. Keep the sphere centres fixed while
+// reducing their radii so the connecting cone stays tangent to both spheres.
+function roundedBody(p: Params, inset: number): Shape3D {
+  const outerRadius = jointDiameter(p.mountType) / 2;
+  const r = outerRadius - inset;
+  const centre = mountStart(p.length, outerRadius);
   const mid = (OVERHANG + Math.PI / 2) / 2;
   return revolve(
-    outline(p, p.diameter / 2, 0)
+    outline(p, p.diameter / 2 - inset, inset)
       .lineTo([r * COS, centre + r * SIN])
       .threePointsArcTo(
         [0, centre + r],
@@ -102,6 +104,10 @@ export function buildBody(p: Params): Shape3D {
       )
       .close(),
   );
+}
+
+export function buildBody(p: Params): Shape3D {
+  return roundedBody(p, 0);
 }
 
 // Wider lower cylinder from the pivot to the seating shoulder, then the solid
@@ -115,33 +121,23 @@ function buildMount(p: Params): Shape3D {
   );
 }
 
-// The inward offset of the body, capped by a 35° cone on the body axis whose
-// point is one wall thickness below the enlarged nose tip. At 0°, 30° and 45°
-// the cavity continues into the wider lower mount as a coaxial void and is
-// trimmed one wall thickness before the shoulder; at 60° and 90° both mount
-// cylinders are excluded so the lower mount stays solid. Cut the cap from the
-// outline before revolving, because the kernel's solid intersection of the two
-// returns nothing.
+// The inward offset of the rounded body, including its tangent nose sphere.
+// At 0°, 30° and 45° the cavity continues into the wider lower mount and closes
+// one wall thickness before the shoulder; at 60° and 90° both mount cylinders
+// are excluded so the lower mount stays solid.
 export function buildCavity(p: Params): Shape3D {
-  const radius = p.diameter / 2 - p.wall;
   const r = jointDiameter(p.mountType) / 2;
-  const tip = mountStart(p.length, r) + r - p.wall;
-  const cap = draw([-tip * TAN, 0])
-    .hLineTo(tip * TAN)
-    .lineTo([0, tip])
-    .close();
-  const offset = outline(p, radius, p.wall)
-    .lineTo([0, frontCentre(p.diameter, p.length) + radius / SIN])
-    .close();
-  const body = revolve(offset.intersect(cap));
+  const body = roundedBody(p, p.wall);
 
   if (p.angle > 45) return body.cut(buildMount(p));
 
   const { start, direction } = mountAxis(p);
   const shoulder = along(start, direction, seating(p));
-  const voidSolid = makeCylinder(r - p.wall, seating(p), start, direction);
+  const voidSolid = makeCylinder(r - p.wall, seating(p) - p.wall, start, direction);
   const beyond = makeCylinder(1000, 1000, along(shoulder, direction, -p.wall), direction);
-  return body.fuse(voidSolid).cut(beyond);
+  // Clip the rounded body first: cutting the fused void can leave a spherical
+  // sliver past the closure at 45°. The tube already ends at the closure plane.
+  return body.cut(beyond).fuse(voidSolid);
 }
 
 // Body and mount with the screw hole, before hollowing.
@@ -202,7 +198,7 @@ export function measure(p: Params) {
 
 const sub = (a: Vec, b: Vec): Vec => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 
-// Binary STL. The mesher closes the cavity's cone tip with a zero-area
+// Binary STL. The mesher can close a revolution pole with a zero-area
 // triangle, which slicers report as an open edge, so triangles with
 // coincident corners are left out.
 function toSTL(shape: Shape3D): Blob {
