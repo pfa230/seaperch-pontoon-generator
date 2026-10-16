@@ -63,11 +63,14 @@ function mountAxis(p: Params) {
 
 // Point where the screw hole's axis crosses the mount axis.
 function holeCentre(p: Params): Vec {
-  const { start, direction } = mountAxis(p);
+  const { radius, start, direction } = mountAxis(p);
+  // Preserve the old cone-to-mount flush reference as the pivot moves back
+  // to the tangent sphere centre. This distance tilts with the mount.
+  const distance = HOLE_FROM_START + radius * (1 / SIN - 1 / TAN);
   return [
-    start[0] + HOLE_FROM_START * direction[0],
+    start[0] + distance * direction[0],
     0,
-    start[2] + HOLE_FROM_START * direction[2],
+    start[2] + distance * direction[2],
   ];
 }
 

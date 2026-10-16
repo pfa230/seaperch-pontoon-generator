@@ -9,6 +9,6 @@ export const FIT_CLEARANCE = 0.2;
 // Screw hole diameter in mm, for an M3 screw.
 export const HOLE_DIAMETER = 3.2;
 
-// Distance in mm along the mount from its start point, where the pipe or
-// fitting edge comes to rest, to the screw hole's axis.
+// Distance in mm along the mount from the nominal cone-to-mount flush
+// reference to the screw hole's axis. The reference tilts with the mount.
 export const HOLE_FROM_START = 10;

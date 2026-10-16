@@ -12,11 +12,14 @@ import {
 import {
   DEFAULTS,
   FILAMENT_DENSITY,
+  MOUNT_BASE_DIAMETER,
   minLength,
   mountDiameter,
+  mountStart,
   type MountType,
   type Params,
 } from "./profile";
+import { MOUNT_LENGTH } from "./settings";
 
 beforeAll(async () => {
   setOC(await init({ print: () => {} }));
@@ -60,8 +63,25 @@ describe.each(["pipe", "fitting"] as MountType[])("%s rounded nose", (mountType)
     }
   });
 
-  test("keeps at least one wall thickness between cavity and rounded body", () => {
+  test("keeps the screw hole about 10 mm from the seated edge at 0°", () => {
     const p = params({ mountType });
+    const [low, high] = screwHole(p).boundingBox.bounds;
+    const holeHeight = (low[2] + high[2]) / 2;
+    const edgeHeight = p.length - MOUNT_BASE_DIAMETER[mountType] / 2 / Math.tan(35 * Math.PI / 180);
+    // Diametral fit clearance places the actual edge about 0.14 mm below
+    // the nominal cone-to-mount flush reference used by the hole setting.
+    expect(holeHeight - edgeHeight).toBeCloseTo(10.14, 2);
+    const start = mountStart(p.length, mountDiameter(mountType) / 2);
+    expect(low[2]).toBeGreaterThan(start);
+    expect(high[2]).toBeLessThan(start + MOUNT_LENGTH);
+  });
+
+  test.each([
+    ["defaults", {}],
+    ["narrow body with thick walls", { diameter: mountType === "pipe" ? 20 : 26, wall: 1.6 }],
+    ["minimum length with thin walls", { length: minLength(DEFAULTS.diameter), wall: 0.8 }],
+  ] as [string, Partial<Params>][])("keeps the wall thickness around the cavity: %s", (_name, overrides) => {
+    const p = params({ mountType, ...overrides });
     const body = buildBody(p);
     const cavity = buildCavity(p);
     const gap = Math.min(...body.faces.map((face) => measureDistanceBetween(cavity, face)));
@@ -133,7 +153,7 @@ describe.each([0, 30, 45, 60, 90] as number[])("%s° mount", (angle) => {
 
 describe.each([
   ["pipe", 173.00],
-  ["fitting", 168.77],
+  ["fitting", 170.94],
 ] as [MountType, number][])("%s mount at 0°", (mountType, top) => {
   test(`cavity stops at about z = ${top}, below the screw hole`, () => {
     const [, high] = buildCavity(params({ mountType })).boundingBox.bounds;
@@ -173,7 +193,12 @@ const isClosed = async (stl: Blob) => {
 describe.each([
   ["default", DEFAULTS],
   ["minimum body length", params({ length: minLength(DEFAULTS.diameter) })],
+  ["pipe mount at 30°", params({ mountType: "pipe", angle: 30 })],
   ["pipe mount at 45°", params({ mountType: "pipe", angle: 45 })],
+  ["pipe mount at 60°", params({ mountType: "pipe", angle: 60 })],
+  ["fitting mount at 0°", params({ mountType: "fitting", angle: 0 })],
+  ["fitting mount at 30°", params({ mountType: "fitting", angle: 30 })],
+  ["fitting mount at 60°", params({ mountType: "fitting", angle: 60 })],
   ["fitting mount at 45°", params({ mountType: "fitting", angle: 45 })],
   ["pipe mount at 90°", params({ mountType: "pipe", angle: 90 })],
   ["fitting mount at 90°", params({ mountType: "fitting", angle: 90 })],
