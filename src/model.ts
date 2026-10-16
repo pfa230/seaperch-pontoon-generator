@@ -1,7 +1,6 @@
 import {
   draw,
   makeCylinder,
-  makeSphere,
   measureVolume,
   type Drawing,
   type Shape3D,
@@ -26,10 +25,9 @@ const TAN = Math.tan(OVERHANG);
 // error at the minimum body length, become sliver faces that split the solid.
 const MIN_SEGMENT = 1e-3;
 
-// The body outline: a floor at height `floor`, a rear sphere arc, a cylinder,
-// a front sphere arc and a 35° cone. Spheres of radius `radius` sit on the
-// outer body's centres, so an inner outline is an inward offset.
-function outline(p: Params, radius: number, floor: number): Drawing {
+// Common outline through the floor, rear sphere, cylinder and front sphere.
+// The cavity shares the outer sphere centres, with radius reduced by the wall.
+function outline(p: Params, radius: number, floor: number) {
   const z1 = rearCentre(p.diameter);
   const front = frontCentre(p.diameter, p.length);
   const z2 = front - z1 < MIN_SEGMENT ? z1 : front;
@@ -44,13 +42,10 @@ function outline(p: Params, radius: number, floor: number): Drawing {
       [radius * Math.cos(rearMid), z1 + radius * Math.sin(rearMid)],
     );
   if (z2 !== z1) pen = pen.vLineTo(z2);
-  return pen
-    .threePointsArcTo(
-      [radius * COS, z2 + radius * SIN],
-      [radius * Math.cos(frontMid), z2 + radius * Math.sin(frontMid)],
-    )
-    .lineTo([0, z2 + radius / SIN])
-    .close();
+  return pen.threePointsArcTo(
+    [radius * COS, z2 + radius * SIN],
+    [radius * Math.cos(frontMid), z2 + radius * Math.sin(frontMid)],
+  );
 }
 
 const revolve = (drawing: Drawing) =>
@@ -88,29 +83,47 @@ export function screwHole(p: Params): Shape3D {
 }
 
 export function buildBody(p: Params): Shape3D {
-  return revolve(outline(p, p.diameter / 2, 0));
+  const r = mountDiameter(p.mountType) / 2;
+  const centre = mountStart(p.length, r);
+  const mid = (OVERHANG + Math.PI / 2) / 2;
+  return revolve(
+    outline(p, p.diameter / 2, 0)
+      .lineTo([r * COS, centre + r * SIN])
+      .threePointsArcTo(
+        [0, centre + r],
+        [r * Math.cos(mid), centre + r * Math.sin(mid)],
+      )
+      .close(),
+  );
 }
 
 // The inward offset of the body, capped by a 35° cone on the body axis whose
-// point is t below the screw hole's lowest point. Where the offset's own cone
-// point is lower, the cap contains the whole offset and changes nothing. The
-// cap is cut from the outline before revolving, because the kernel's solid
-// intersection of the two returns nothing.
+// point is t below the screw hole's lowest point or the rounded nose tip,
+// whichever is lower. This keeps the cavity roof at 35° rather than following
+// the steeper end of the spherical cap. Cut the cap from the outline before
+// revolving, because the kernel's solid intersection of the two returns nothing.
 export function buildCavity(p: Params): Shape3D {
-  const tip = holeCentre(p)[2] - HOLE_DIAMETER / 2 - p.wall;
+  const r = mountDiameter(p.mountType) / 2;
+  const tip = Math.min(
+    holeCentre(p)[2] - HOLE_DIAMETER / 2,
+    mountStart(p.length, r) + r,
+  ) - p.wall;
   const cap = draw([-tip * TAN, 0])
     .hLineTo(tip * TAN)
     .lineTo([0, tip])
     .close();
-  return revolve(outline(p, p.diameter / 2 - p.wall, p.wall).intersect(cap));
+  const radius = p.diameter / 2 - p.wall;
+  const offset = outline(p, radius, p.wall)
+    .lineTo([0, frontCentre(p.diameter, p.length) + radius / SIN])
+    .close();
+  return revolve(offset.intersect(cap));
 }
 
 // Body and mount with the screw hole, before hollowing.
 function buildOuter(p: Params): Shape3D {
   const { radius, start, direction } = mountAxis(p);
-  const ball = makeSphere(radius).translate(start);
   const mount = makeCylinder(radius, MOUNT_LENGTH, start, direction);
-  return buildBody(p).fuse(ball).fuse(mount).cut(screwHole(p));
+  return buildBody(p).fuse(mount).cut(screwHole(p));
 }
 
 export function buildPontoon(p: Params): Shape3D {

@@ -1,5 +1,5 @@
 import init from "replicad-opencascadejs";
-import { getOC, measureVolume, setOC, type Shape3D } from "replicad";
+import { getOC, measureDistanceBetween, setOC, type Shape3D } from "replicad";
 import { beforeAll, describe, expect, test } from "vitest";
 import {
   buildBody,
@@ -13,6 +13,7 @@ import {
   DEFAULTS,
   FILAMENT_DENSITY,
   minLength,
+  mountDiameter,
   type MountType,
   type Params,
 } from "./profile";
@@ -31,42 +32,78 @@ const planarFaces = (shape: Shape3D) =>
       normal: face.normalAt().toTuple(),
     }));
 
-describe("default pontoon", () => {
-  test("stands on z = 0 with the body point at z = 180", () => {
-    const [low, high] = buildBody(DEFAULTS).boundingBox.bounds;
-    expect(low[2]).toBeCloseTo(0, 6);
-    expect(high[2]).toBeCloseTo(180, 6);
+describe.each(["pipe", "fitting"] as MountType[])("%s rounded nose", (mountType) => {
+  test("has body sphere, tangent cone and mount-sized spherical sector", () => {
+    const body = buildBody(params({ mountType }));
+    const spheres = body.faces.filter((face) => face.geomType === "SPHERE")
+      .sort((a, b) => a.center.z - b.center.z);
+    expect(spheres).toHaveLength(3);
+    const front = spheres[1];
+    const nose = spheres[2];
+    const cone = body.faces.find((face) => face.geomType === "CONE")!;
+    expect(cone).toBeDefined();
+    const r = mountDiameter(mountType) / 2;
+    const noseTop = body.boundingBox.bounds[1][2];
+    const centre = noseTop - r;
+    for (const u of [0.1, 0.5, 0.9]) {
+      const [x, y, z] = nose.pointOnSurface(u, 0.5).toTuple();
+      expect(Math.hypot(x, y, z - centre)).toBeCloseTo(r, 6);
+    }
+    for (const sphere of [front, nose]) {
+      // The lowest nose latitude and highest front latitude bound the cone.
+      const v = sphere === front ? 1 : 0;
+      const point = sphere.pointOnSurface(0.5, v);
+      const sphereNormal = sphere.normalAt(point).normalize().toTuple();
+      const coneNormal = cone.normalAt(point).normalize().toTuple();
+      expect(Math.acos(sphereNormal[2]) * 180 / Math.PI).toBeCloseTo(55, 6);
+      sphereNormal.forEach((n, i) => expect(n).toBeCloseTo(coneNormal[i], 6));
+    }
   });
 
-  test("is one solid whose mount ends at about z = 193.86", () => {
+  test("keeps at least one wall thickness between cavity and rounded body", () => {
+    const p = params({ mountType });
+    const body = buildBody(p);
+    const cavity = buildCavity(p);
+    const gap = Math.min(...body.faces.map((face) => measureDistanceBetween(cavity, face)));
+    expect(gap).toBeCloseTo(p.wall, 6);
+  });
+});
+
+describe("default pontoon", () => {
+  test("stands on z = 0 with the rounded body tip at about z = 174.20", () => {
+    const [low, high] = buildBody(DEFAULTS).boundingBox.bounds;
+    expect(low[2]).toBeCloseTo(0, 6);
+    expect(high[2]).toBeCloseTo(174.20, 2);
+  });
+
+  test("is one solid whose mount ends at about z = 191.40", () => {
     const pontoon = buildPontoon(DEFAULTS);
     expect(pontoon.solids).toHaveLength(1);
     const [low, high] = pontoon.boundingBox.bounds;
     expect(low[2]).toBeCloseTo(0, 6);
-    expect(high[2]).toBeCloseTo(193.86, 2);
+    expect(high[2]).toBeCloseTo(191.40, 2);
   });
 
-  // Material is the 23.9 cm³ of t-thick walls plus the 1.1 cm³ of nose the
-  // cavity cap leaves solid below the screw hole.
-  test("displaces 133.9 mL with 25.0 cm³ of material", () => {
+  // Includes the solid nose below the screw hole and rounded tip.
+  test("displaces 133.4 mL with 26.6 cm³ of material", () => {
     const { displaced, material } = measure(DEFAULTS);
-    expect(Math.abs(displaced / 133.9 - 1)).toBeLessThan(0.01);
-    expect(Math.abs(material / 25.0 - 1)).toBeLessThan(0.01);
-    expect(Math.abs((material * FILAMENT_DENSITY.asa) / 26.7 - 1)).toBeLessThan(0.01);
+    expect(displaced).toBeCloseTo(133.4, 1);
+    expect(Math.abs(material / 26.6 - 1)).toBeLessThan(0.01);
+    expect(Math.abs((material * FILAMENT_DENSITY.asa) / 28.5 - 1)).toBeLessThan(0.01);
   });
 
-  test("meshes the whole outer solid from z = 0 to about z = 193.86", () => {
+  test("meshes the whole outer solid from z = 0 to about z = 191.40", () => {
     const { mesh } = measure(DEFAULTS);
     const vertexCount = mesh.vertices.length / 3;
     expect(mesh.triangles.length % 3).toBe(0);
     expect(Math.max(...mesh.triangles)).toBeLessThan(vertexCount);
     const zs = Array.from({ length: vertexCount }, (_, i) => mesh.vertices[3 * i + 2]);
     expect(Math.min(...zs)).toBeCloseTo(0, 2);
-    expect(Math.max(...zs)).toBeCloseTo(193.86, 2);
+    expect(Math.max(...zs)).toBeCloseTo(191.40, 2);
   });
 });
 
-describe.each([45, 90] as number[])("%s° mount", (angle) => {
+describe.each([0, 30, 45, 60, 90] as number[])("%s° mount", (angle) => {
   const a = (angle * Math.PI) / 180;
   describe.each(["pipe", "fitting"] as MountType[])("%s", (mountType) => {
     test("is one solid with no exposed mount base", () => {
@@ -87,16 +124,16 @@ describe.each([45, 90] as number[])("%s° mount", (angle) => {
       expect(end?.normal[2]).toBeCloseTo(Math.cos(a), 6);
     });
 
-    test("screw hole does not reach the cavity", () => {
+    test("screw hole stays at least one wall thickness from the cavity", () => {
       const p = params({ mountType, angle });
-      expect(measureVolume(screwHole(p).intersect(buildCavity(p)))).toBe(0);
+      expect(measureDistanceBetween(screwHole(p), buildCavity(p))).toBeGreaterThanOrEqual(p.wall - 1e-6);
     });
   });
 });
 
 describe.each([
-  ["pipe", 176.06],
-  ["fitting", 172.1],
+  ["pipe", 173.00],
+  ["fitting", 168.77],
 ] as [MountType, number][])("%s mount at 0°", (mountType, top) => {
   test(`cavity stops at about z = ${top}, below the screw hole`, () => {
     const [, high] = buildCavity(params({ mountType })).boundingBox.bounds;

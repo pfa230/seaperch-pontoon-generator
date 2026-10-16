@@ -27,6 +27,6 @@ test("mount diameters with the default clearance", () => {
   expect(mountDiameter("fitting")).toBeCloseTo(21.14, 9);
 });
 
-test("default pipe mount starts at about z = 168.86", () => {
-  expect(mountStart(180, mountDiameter("pipe") / 2)).toBeCloseTo(168.86, 2);
+test("default pipe mount starts at about z = 166.40", () => {
+  expect(mountStart(180, mountDiameter("pipe") / 2)).toBeCloseTo(166.40, 2);
 });

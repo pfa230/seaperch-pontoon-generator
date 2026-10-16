@@ -13,14 +13,14 @@ All geometry SHALL be in millimetres in a single coordinate frame where the pont
 - **THEN** the lowest point of the model is at z = 0 and the rear flat lies in that plane
 
 ### Requirement: Body shape
-The body SHALL be a solid of revolution of outer diameter D: a cylinder joined to a rear sphere and a front sphere of radius D/2, with the front sphere continuing into a tangent cone that ends in a point. The body length L SHALL be the distance from the rear flat to the cone's point.
+The body SHALL be a solid of revolution of outer diameter D: a cylinder joined to a rear sphere and a front sphere of radius D/2, continuing into a tangent cone and then a tangent spherical cap whose diameter equals the mount diameter. The front sphere SHALL meet the cone at 55° from the body axis, measured along the sphere's radius. The body length L SHALL remain the distance from the rear flat to the cone's virtual point; the rounded body SHALL end below that point.
 
 #### Scenario: Default body
 - **WHEN** D = 32 mm and L = 180 mm
-- **THEN** the body's maximum diameter is 32 mm and its highest point on the axis, before the mount is added, is at z = 180 mm
+- **THEN** with the default pipe mount the body's maximum diameter is 32 mm, its virtual cone point is at z = 180 mm and its rounded tip before the mount is added is at z ≈ 174.20 mm
 
 ### Requirement: Overhang limit
-No outer or inner surface of the body SHALL lean more than 35° from vertical, measured with the model standing on its flat, except the outer and inner rear sphere surfaces more than 35° below the rear sphere's equator. The rear sphere SHALL be cut at the latitude where its outer surface makes 35° with the print bed, which is 55° from vertical, and the front cone SHALL have a 35° half-angle.
+No outer or inner surface of the body SHALL lean more than 35° from vertical, measured with the model standing on its flat, except the outer and inner rear sphere surfaces more than 35° below the rear sphere's equator and the outer mount-sized spherical cap above its cone tangent. The rear sphere SHALL be cut at the latitude where its outer surface makes 35° with the print bed, which is 55° from vertical, and the front cone SHALL have a 35° half-angle.
 
 #### Scenario: Rear flat size
 - **WHEN** D = 32 mm
@@ -28,10 +28,10 @@ No outer or inner surface of the body SHALL lean more than 35° from vertical, m
 
 #### Scenario: Front cone
 - **WHEN** D = 32 mm
-- **THEN** the front sphere meets the cone where its surface leans 35° from vertical, and the cone's walls lean 35° from vertical up to its point
+- **THEN** the front sphere meets the cone at a polar angle of 55° from the axis, where its surface leans 35° from vertical, and the cone keeps that slope until it meets the mount-sized sphere tangentially
 
 ### Requirement: Sealed thin wall
-The body SHALL be hollow with a wall thickness of at least t everywhere, and a single closed internal cavity with no opening to the outside. The cavity SHALL be the inward offset of the body by t, with its floor at height t, intersected with a cone with a 35° half-angle on the body axis whose point lies one wall thickness t below the screw hole's lowest point, or at the inward offset's own cone point if that is lower. The wall SHALL be exactly t on the sides, domes and rear floor wherever the cavity follows the inward offset, and thicker where the cone replaces it; for D = 32 mm, L = 180 mm, t = 1.2 mm and the fitting mount at 45°, the side wall at z = 150 mm is about 2.57 mm.
+The body SHALL be hollow with a wall thickness of at least t everywhere, and a single closed internal cavity with no opening to the outside. The cavity SHALL be the inward offset of the body by t, with its floor at height t, intersected with a cone with a 35° half-angle on the body axis whose point lies one wall thickness t below the lower of the screw hole's lowest point and the rounded body tip. The wall SHALL be exactly t on the sides, domes and rear floor wherever the cavity follows the inward offset, and thicker where the cone replaces it.
 
 #### Scenario: Cavity is closed
 - **WHEN** a pontoon is generated with any valid parameters
@@ -39,11 +39,11 @@ The body SHALL be hollow with a wall thickness of at least t everywhere, and a s
 
 #### Scenario: Cavity stops below the default pipe-mount hole
 - **WHEN** D = 32 mm, L = 180 mm, t = 1.2 mm, mount type "inside pipe" and angle 0°
-- **THEN** the cavity's highest point is at z = 168.86 + 10 − 1.6 − 1.2 ≈ 176.06 mm
+- **THEN** the cavity's highest point is at z = 166.40 + 7.80 − 1.2 ≈ 173.00 mm, limited by the rounded nose
 
 #### Scenario: Cavity stops below the fitting-mount hole
 - **WHEN** D = 32 mm, L = 180 mm, t = 1.2 mm, mount type "into fitting" and angle 0°
-- **THEN** the cavity's highest point is at z = 164.90 + 10 − 1.6 − 1.2 ≈ 172.10 mm
+- **THEN** the cavity's highest point is at z = 161.57 + 10 − 1.6 − 1.2 ≈ 168.77 mm
 
 ### Requirement: Mount type
 The nose SHALL carry a solid cylindrical mount whose outer diameter is set by the selected mount type: 15.80 mm minus the fit clearance for insertion inside 1/2" Schedule 40 PVC pipe, or 21.34 mm minus the fit clearance for insertion into a 1/2" PVC fitting socket. The fit clearance SHALL be a fixed build setting on the diameter, 0.2 mm by default.
@@ -57,11 +57,15 @@ The nose SHALL carry a solid cylindrical mount whose outer diameter is set by th
 - **THEN** the mount's outer diameter is 21.14 mm
 
 ### Requirement: Mount root
-The mount's start point SHALL be the point on the body axis where the cone's radius equals the mount's radius r, so a coaxial mount meets the cone flush. The mount SHALL be a cylinder of radius r that starts at the start point and runs along the mount axis, joined to the body by a ball joint: a sphere of radius r centred on the start point. The cylinder's base disc SHALL lie inside the ball joint at every mount angle, so no part of it is exposed. The mount length SHALL be measured from the start point along the mount axis, and SHALL be one fixed build setting for both mount types, 25 mm by default, never less than the fitting mount's radius.
+The mount's start point SHALL be the centre of the mount-sized sphere tangent to the front cone: z = L − r / sin 35°, where r is the mount radius. The body's spherical cap SHALL round the joint, with no separately added ball or pointed cone inside it. The mount SHALL be a cylinder of radius r that starts at this centre and runs along the mount axis. Its base disc SHALL lie inside the body at every mount angle, so no part of it is exposed. The mount length SHALL be measured from the start point along the mount axis, and SHALL be one fixed build setting for both mount types, 25 mm by default, never less than the fitting mount's radius.
 
 #### Scenario: Coaxial mount on default body
 - **WHEN** D = 32 mm, L = 180 mm, mount type "inside pipe", default clearance, angle 0° and the default 25 mm mount length setting
-- **THEN** the mount starts at z = 180 − 7.80 / tan 35° ≈ 168.86 mm and ends at z ≈ 193.86 mm, and the ball joint adds no material outside the mount cylinder and the cone
+- **THEN** the mount starts at z = 180 − 7.80 / sin 35° ≈ 166.40 mm and ends at z ≈ 191.40 mm, meeting the spherical cap at its equator
+
+#### Scenario: Tangent spherical cap for both mounts
+- **WHEN** either mount type is selected with the default clearance
+- **THEN** the cap's sphere diameter is 15.60 mm for the pipe mount or 21.14 mm for the fitting mount, and its cone join has no change in surface slope
 
 ### Requirement: Mount angle
 The mount axis SHALL pivot about its start point, tilted from the body axis by a user-set angle of 0°, 30°, 45°, 60° or 90°. The overhang limit does not apply to the mount: its side leans from vertical by the mount angle.
