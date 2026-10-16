@@ -245,6 +245,43 @@ describe.each(["pipe", "fitting"] as MountType[])("%s cavity", (mountType) => {
   });
 });
 
+describe.each(["pipe", "fitting"] as MountType[])(
+  "%s exposed lower-mount wall",
+  (mountType) => {
+    test.each([0, 30, 45] as number[])(
+      "is one wall t thick on the cylinder at %s°",
+      (angle) => {
+        const a = (angle * Math.PI) / 180;
+        const radial: Vec = [Math.cos(a), 0, -Math.sin(a)];
+        const lateral: Vec = [0, 1, 0];
+        for (const wall of [0.8, 1.2, 1.6]) {
+          const p = params({ mountType, angle, wall });
+          const cavity = buildCavity(p);
+          const pontoon = buildPontoon(p);
+          const { joint, pivot, direction } = axis(p);
+          // A ring on the lower cylinder just inside the cavity's closure.
+          const probeRing = along(pivot, direction, seating(p) - wall - 0.05);
+          let exposed = 0;
+          for (let k = 0; k < 8; k++) {
+            const t = (k * Math.PI) / 4;
+            const point = along(
+              along(probeRing, radial, joint * Math.cos(t)),
+              lateral,
+              joint * Math.sin(t),
+            );
+            const toExterior = measureDistanceBetween(makeSphere(0.01).translate(point), pontoon);
+            const toCavity = measureDistanceBetween(makeSphere(0.01).translate(point), cavity);
+            if (toExterior < 0.05) exposed++;
+            expect(toCavity).toBeCloseTo(wall - 0.01, 2);
+          }
+          // At least one sample must sit on the exposed cylinder side.
+          expect(exposed).toBeGreaterThan(0);
+        }
+      },
+    );
+  },
+);
+
 describe.each([
   ["pipe", 167.513],
   ["fitting", 163.562],
