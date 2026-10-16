@@ -46,7 +46,7 @@ The page SHALL generate geometry and files entirely in the browser, with no serv
 - **THEN** the form still accepts input and the page shows that generation is in progress
 
 ### Requirement: Form validation rules
-The page SHALL reject: a non-numeric outer diameter or length; a zero or negative outer diameter or length; a mount diameter above D × cos 35°; a length too short to fit both ends.
+The page SHALL reject: a non-numeric outer diameter or length; a zero or negative outer diameter or length; a lower mount and nose sphere diameter d + 4 mm above D × cos 35°, where d is the fit-adjusted insertion peg diameter; a length too short to fit both ends.
 
 #### Scenario: Body too short
 - **WHEN** D = 32 mm and the length is 30 mm
@@ -54,7 +54,15 @@ The page SHALL reject: a non-numeric outer diameter or length; a zero or negativ
 
 #### Scenario: Mount too wide for the body
 - **WHEN** D = 24 mm and mount type is "into fitting"
-- **THEN** the page marks the mount type input with an error, because 21.14 mm exceeds 24 × cos 35° ≈ 19.66 mm
+- **THEN** the page marks the mount type input with an error, because the 25.14 mm lower mount and nose diameter exceeds 24 × cos 35° ≈ 19.66 mm
+
+#### Scenario: Previously valid narrow body needs the larger nose check
+- **WHEN** D = 26 mm and mount type is "into fitting"
+- **THEN** the page rejects the mount type because 25.14 mm exceeds 26 × cos 35° ≈ 21.30 mm, even though its 21.14 mm insertion peg alone would fit
+
+#### Scenario: Default body still accepts either mount
+- **WHEN** D = 32 mm and the other inputs are valid
+- **THEN** either mount type passes the size check, since both 19.60 mm and 25.14 mm are below 32 × cos 35° ≈ 26.21 mm
 
 ### Requirement: 3D preview
 For valid inputs, the page SHALL show a shaded 3D view of the generated pontoon lying horizontally, with the mount on the left and a tilted mount pointing up. The user SHALL be able to rotate the view by dragging and zoom by mouse wheel or pinch. A "Reset view" button SHALL frame the whole current pontoon from the starting direction, as large as it fits in the preview. A new pontoon SHALL replace the shown one without changing the user's rotation or zoom.
