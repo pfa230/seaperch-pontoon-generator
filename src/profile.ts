@@ -38,7 +38,6 @@ export const MOUNT_BASE_DIAMETER: Record<MountType, number> = {
 export const OVERHANG = (35 * Math.PI) / 180;
 const REAR_CUT = (55 * Math.PI) / 180;
 const SIN = Math.sin(OVERHANG);
-const TAN = Math.tan(OVERHANG);
 const REAR_SIN = Math.sin(REAR_CUT);
 const REAR_COS = Math.cos(REAR_CUT);
 
@@ -55,6 +54,6 @@ export const minLength = (diameter: number) =>
 export const mountDiameter = (mountType: MountType) =>
   MOUNT_BASE_DIAMETER[mountType] - FIT_CLEARANCE;
 
-// Height on the body axis where the cone's radius equals the mount radius.
+// Centre of the mount-sized sphere tangent to the front cone.
 export const mountStart = (length: number, mountRadius: number) =>
-  length - mountRadius / TAN;
+  length - mountRadius / SIN;
