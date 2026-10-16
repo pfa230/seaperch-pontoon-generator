@@ -1,7 +1,7 @@
 import {
   OVERHANG,
+  jointDiameter,
   minLength,
-  mountDiameter,
   type Params,
 } from "./profile";
 
@@ -23,9 +23,9 @@ export function validate(p: Params): Errors {
   }
 
   if (ok("diameter")) {
-    const mount = mountDiameter(p.mountType);
-    if (mount > p.diameter * Math.cos(OVERHANG)) {
-      errors.mountType = `Mount diameter ${mm(mount)} exceeds ${mm(p.diameter * Math.cos(OVERHANG))} (D × cos 35°).`;
+    const joint = jointDiameter(p.mountType);
+    if (joint > p.diameter * Math.cos(OVERHANG)) {
+      errors.mountType = `Mount and nose diameter ${mm(joint)} exceeds ${mm(p.diameter * Math.cos(OVERHANG))} (D × cos 35°).`;
     }
     if (ok("length") && p.length < minLength(p.diameter)) {
       errors.length = `Must be at least ${minLength(p.diameter).toFixed(1)} mm for this diameter.`;

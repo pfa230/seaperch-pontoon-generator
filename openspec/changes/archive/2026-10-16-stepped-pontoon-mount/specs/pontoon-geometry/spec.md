@@ -9,8 +9,19 @@ The body SHALL be a solid of revolution of outer diameter D: a cylinder joined t
 - **WHEN** D = 32 mm and L = 180 mm
 - **THEN** with the default pipe mount the body's maximum diameter is 32 mm, its virtual cone point is at z = 180 mm and its rounded tip before the mount is added is at z ≈ 172.71 mm
 
+### Requirement: Overhang limit
+No outer or inner surface of the body SHALL lean more than 35° from vertical, measured with the model standing on its flat, except the outer and inner rear sphere surfaces more than 35° below the rear sphere's equator and the outer spherical cap of diameter d + 4 mm above its cone tangent. The rear sphere SHALL be cut at the latitude where its outer surface makes 35° with the print bed, which is 55° from vertical, and the front cone SHALL have a 35° half-angle.
+
+#### Scenario: Rear flat size
+- **WHEN** D = 32 mm
+- **THEN** the rear flat is a disc of diameter 32 × sin 35° ≈ 18.35 mm, and the rear sphere's centre is at z = 16 × cos 35° ≈ 13.11 mm
+
+#### Scenario: Front cone
+- **WHEN** D = 32 mm
+- **THEN** the front sphere meets the cone at a polar angle of 55° from the axis, where its surface leans 35° from vertical, and the cone keeps that slope until it meets the spherical cap of diameter d + 4 mm tangentially
+
 ### Requirement: Sealed thin wall
-The body SHALL have one closed internal cavity with its floor at height t and at least t of material separating it from the exterior and screw hole. Away from the mount joint it SHALL follow the body's inward offset by t, limited by a 35° cavity-roof cone. At 0°, 30° and 45° the cavity SHALL continue into the wider lower mount, with cylindrical wall thickness t and a closure at least t thick before the seating shoulder. At 60° and 90° the wider lower mount SHALL be solid. The entire 20 mm insertion peg SHALL be solid apart from its screw hole.
+The body SHALL have one closed internal cavity with its floor at height t and at least t of material separating it from the exterior and screw hole. Away from the mount joint it SHALL follow the body's inward offset by t, limited by a 35° cavity-roof cone on the body axis whose point is at z = c + R − t at every angle, where c is the enlarged nose sphere's centre height and R its radius. Screw-hole height SHALL NOT limit the cavity. At 0°, 30° and 45° the cavity SHALL continue into the wider lower mount independently of that roof cone, with cylindrical wall thickness t and a closure at least t thick before the seating shoulder. At 60° and 90° the wider lower mount SHALL be solid. The entire 20 mm insertion peg SHALL be solid apart from its screw hole.
 
 #### Scenario: Cavity is closed
 - **WHEN** a pontoon is generated with any valid parameters
@@ -32,6 +43,11 @@ The body SHALL have one closed internal cavity with its floor at height t and at
 #### Scenario: Solid lower mount at 60 and 90 degrees
 - **WHEN** either mount type is generated at 60° or 90°
 - **THEN** the entire wider lower cylinder is solid, the body remains hollow and its cavity does not enter either mount cylinder
+
+#### Scenario: Body roof reference is independent of the sideways screw hole
+- **WHEN** D = 32 mm, L = 180 mm, t = 1.2 mm, mount type is "inside pipe", angle is 90° and clearance is 0.2 mm
+- **THEN** the body cavity's limiting roof cone has its point at z = c + R − t ≈ 171.51 mm, while both mount cylinders remain solid apart from the peg's screw hole
+- **AND** the screw hole's lower height does not lower that roof reference or fill unrelated body volume
 
 ### Requirement: Mount type
 The nose SHALL carry a stepped cylindrical mount. Its solid insertion peg SHALL have diameter d: 15.80 mm minus the fit clearance for insertion inside 1/2" Schedule 40 PVC pipe, or 21.34 mm minus the fit clearance for insertion into a 1/2" PVC fitting socket. The lower cylinder SHALL have diameter d + 4 mm. The fit clearance SHALL remain a fixed build setting on the diameter, 0.2 mm by default.
