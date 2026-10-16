@@ -3,6 +3,7 @@ import {
   getOC,
   makeCylinder,
   makeSphere,
+  makeVertex,
   measureDistanceBetween,
   measureVolume,
   setOC,
@@ -153,6 +154,56 @@ describe.each(["pipe", "fitting"] as MountType[])("%s rounded nose", (mountType)
     const gap = Math.min(...outer.faces.map((face) => measureDistanceBetween(cavity, face)));
     expect(gap).toBeCloseTo(p.wall, 6);
   });
+
+  test.each([0.8, 1.2, 1.6])("has uniform front-dome and cone walls at t = %s", (wall) => {
+    const p = params({ mountType, wall });
+    const cavity = buildCavity(p);
+    const front = p.length - p.diameter / 2 / Math.sin(35 * Math.PI / 180);
+    const bodyRadius = p.diameter / 2;
+
+    // Probe several normals on the exposed dome, including near its cone join.
+    for (const degrees of [5, 20, 34]) {
+      const phi = degrees * Math.PI / 180;
+      const point: Vec = [bodyRadius * Math.cos(phi), 0, front + bodyRadius * Math.sin(phi)];
+      expect(measureDistanceBetween(makeVertex(point), cavity)).toBeCloseTo(wall, 5);
+    }
+
+    // Midway along the exposed cone, before the wider lower cylinder covers it.
+    const slope = Math.tan(35 * Math.PI / 180);
+    const coneStart = front + bodyRadius * Math.sin(35 * Math.PI / 180);
+    const jointStart = p.length - jointDiameter(mountType) / 2 / slope;
+    const z = (coneStart + jointStart) / 2;
+    const point: Vec = [(p.length - z) * slope, 0, z];
+    expect(measureDistanceBetween(makeVertex(point), cavity)).toBeCloseTo(wall, 5);
+  });
+
+  test.each([0.8, 1.2, 1.6])("has a concentric tangent inner nose sphere at t = %s", (wall) => {
+    const p = params({ mountType, angle: 90, wall });
+    const cavity = buildCavity(p);
+    const radius = jointDiameter(mountType) / 2;
+    const centre = mountStart(p.length, radius);
+    const spheres = cavity.faces.filter((face) => face.geomType === "SPHERE")
+      .sort((a, b) => a.center.z - b.center.z);
+    expect(spheres).toHaveLength(3);
+    const nose = spheres[2];
+    for (const u of [0.2, 0.5, 0.8]) {
+      const [x, y, z] = nose.pointOnSurface(u, 0.5).toTuple();
+      expect(Math.hypot(x, y, z - centre)).toBeCloseTo(radius - wall, 6);
+    }
+
+    // The negative-X side is clear of the sideways solid mount.
+    const phi = 35 * Math.PI / 180;
+    const tangent: Vec = [-(radius - wall) * Math.cos(phi), 0, centre + (radius - wall) * Math.sin(phi)];
+    const cone = cavity.faces.find((face) => face.geomType === "CONE")!;
+    expect(cone).toBeDefined();
+    const sphereNormal = nose.normalAt(tangent).normalize().toTuple();
+    const coneNormal = cone.normalAt(tangent).normalize().toTuple();
+    sphereNormal.forEach((component, i) => expect(component).toBeCloseTo(coneNormal[i], 6));
+
+    const poleSide = 60 * Math.PI / 180;
+    const point: Vec = [-radius * Math.cos(poleSide), 0, centre + radius * Math.sin(poleSide)];
+    expect(measureDistanceBetween(makeVertex(point), cavity)).toBeCloseTo(wall, 5);
+  });
 });
 
 describe("default pontoon", () => {
@@ -170,12 +221,12 @@ describe("default pontoon", () => {
     expect(high[2]).toBeCloseTo(188.71, 2);
   });
 
-  // Includes the solid nose below the screw hole and rounded tip.
-  test("displaces 133.0 mL with 26.5 cm³ of material", () => {
+  // Includes the solid peg and the sealed shoulder closure.
+  test("displaces 133.0 mL with 23.6 cm³ of material", () => {
     const { displaced, material } = measure(DEFAULTS);
     expect(displaced).toBeCloseTo(133.0, 1);
-    expect(Math.abs(material / 26.5 - 1)).toBeLessThan(0.01);
-    expect(Math.abs((material * FILAMENT_DENSITY.asa) / 28.4 - 1)).toBeLessThan(0.01);
+    expect(Math.abs(material / 23.6 - 1)).toBeLessThan(0.01);
+    expect(Math.abs((material * FILAMENT_DENSITY.asa) / 25.2 - 1)).toBeLessThan(0.01);
   });
 
   test("meshes the whole outer solid from z = 0 to about z = 188.71", () => {
@@ -309,7 +360,7 @@ describe.each(["pipe", "fitting"] as MountType[])(
         for (const wall of [0.8, 1.2, 1.6]) {
           const p = params({ mountType, angle, wall });
           const cavity = buildCavity(p);
-          const pontoon = buildPontoon(p);
+          const outer = buildBody(p).fuse(mountSolid(p));
           const { joint, pivot, direction } = axis(p);
           // A ring on the lower cylinder just inside the cavity's closure.
           const probeRing = along(pivot, direction, seating(p) - wall - 0.05);
@@ -321,10 +372,11 @@ describe.each(["pipe", "fitting"] as MountType[])(
               lateral,
               joint * Math.sin(t),
             );
-            const toExterior = measureDistanceBetween(makeSphere(0.01).translate(point), pontoon);
-            const toCavity = measureDistanceBetween(makeSphere(0.01).translate(point), cavity);
-            if (toExterior < 0.05) exposed++;
-            expect(toCavity).toBeCloseTo(wall - 0.01, 2);
+            const probe = makeVertex(point);
+            const toExterior = Math.min(...outer.faces.map((face) => measureDistanceBetween(probe, face)));
+            if (toExterior > 1e-6) continue;
+            exposed++;
+            expect(measureDistanceBetween(probe, cavity)).toBeCloseTo(wall, 5);
           }
           // At least one sample must sit on the exposed cylinder side.
           expect(exposed).toBeGreaterThan(0);
@@ -344,7 +396,8 @@ describe.each([
   });
 });
 
-test("the sideways pipe cavity roof is c + R − t at 90°", () => {  const p = params({ mountType: "pipe", angle: 90 });
+test("the sideways pipe cavity has its rounded tip at c + R − t", () => {
+  const p = params({ mountType: "pipe", angle: 90 });
   const R = jointDiameter("pipe") / 2;
   const expected = mountStart(p.length, R) + R - p.wall;
   expect(expected).toBeCloseTo(171.51, 2);
