@@ -19,8 +19,9 @@ import type { ModelMesh } from "./model";
 const VIEW_DIRECTION = new Vector3(0, 1, 0.4).normalize();
 
 export interface Preview {
-  show(mesh: ModelMesh): void;
+  show(mesh: ModelMesh, sectionMesh: ModelMesh): void;
   clear(): void;
+  setCrossSection(shown: boolean): void;
 }
 
 export function createPreview(container: HTMLElement): Preview {
@@ -29,7 +30,7 @@ export function createPreview(container: HTMLElement): Preview {
     renderer = new WebGLRenderer({ antialias: true, alpha: true });
   } catch {
     container.textContent = "3D preview unavailable in this browser.";
-    return { show: () => {}, clear: () => {} };
+    return { show: () => {}, clear: () => {}, setCrossSection: () => {} };
   }
 
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -51,7 +52,10 @@ export function createPreview(container: HTMLElement): Preview {
   scene.add(camera);
 
   const material = new MeshStandardMaterial({ color: 0xffb000 });
-  const object = new Mesh(new BufferGeometry(), material);
+  let exterior = new BufferGeometry();
+  let section: BufferGeometry | null = null;
+  let crossSection = false;
+  const object = new Mesh(exterior, material);
   object.visible = false;
   scene.add(object);
 
@@ -61,8 +65,8 @@ export function createPreview(container: HTMLElement): Preview {
   controls.addEventListener("change", render);
 
   function fit() {
-    object.geometry.computeBoundingBox();
-    const box = object.geometry.boundingBox;
+    exterior.computeBoundingBox();
+    const box = exterior.boundingBox;
     if (!box || box.isEmpty()) return;
     const size = box.getSize(new Vector3());
     const centre = box.getCenter(new Vector3());
@@ -91,16 +95,25 @@ export function createPreview(container: HTMLElement): Preview {
   });
   resize.observe(container);
 
-  let framed = false;
-  function show(mesh: ModelMesh) {
+  function meshGeometry(mesh: ModelMesh) {
     const geometry = new BufferGeometry();
     geometry.setAttribute("position", new BufferAttribute(mesh.vertices, 3));
     geometry.setAttribute("normal", new BufferAttribute(mesh.normals, 3));
     geometry.setIndex(new BufferAttribute(mesh.triangles, 1));
     geometry.rotateY(-Math.PI / 2);
     geometry.rotateZ(Math.PI);
-    object.geometry.dispose();
-    object.geometry = geometry;
+    return geometry;
+  }
+
+  let framed = false;
+  function show(mesh: ModelMesh, sectionMesh: ModelMesh) {
+    const nextExterior = meshGeometry(mesh);
+    const nextSection = meshGeometry(sectionMesh);
+    exterior.dispose();
+    section?.dispose();
+    exterior = nextExterior;
+    section = nextSection;
+    object.geometry = crossSection ? section : exterior;
     object.visible = true;
     if (!framed) {
       framed = true;
@@ -115,9 +128,16 @@ export function createPreview(container: HTMLElement): Preview {
     render();
   }
 
+  function setCrossSection(shown: boolean) {
+    crossSection = shown;
+    if (!section) return;
+    object.geometry = shown ? section : exterior;
+    render();
+  }
+
   document
     .querySelector<HTMLButtonElement>("#reset-view")
     ?.addEventListener("click", fit);
 
-  return { show, clear };
+  return { show, clear, setCrossSection };
 }

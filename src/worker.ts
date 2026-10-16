@@ -18,6 +18,7 @@ export type Response =
       displaced: number;
       material: number;
       mesh: ModelMesh;
+      sectionMesh: ModelMesh;
     }
   | { type: "file"; id: number; format: "step" | "stl"; file: Blob }
   | { type: "failed"; id: number; message: string };

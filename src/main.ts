@@ -5,6 +5,7 @@ import type { Request, Response } from "./worker";
 
 const form = document.querySelector<HTMLFormElement>("#form")!;
 const status = document.querySelector<HTMLElement>("#status")!;
+const crossSection = document.querySelector<HTMLInputElement>("#cross-section")!;
 const output = (id: string) => document.querySelector<HTMLElement>(`#${id}`)!;
 const preview = createPreview(document.querySelector<HTMLElement>("#preview")!);
 const buttons = {
@@ -16,6 +17,7 @@ const field = (key: keyof Params) =>
   form.elements.namedItem(key) as HTMLInputElement | HTMLSelectElement;
 
 for (const key of keys) field(key).value = String(DEFAULTS[key]);
+crossSection.checked = false;
 
 const worker = new Worker(new URL("./worker.ts", import.meta.url), {
   type: "module",
@@ -102,7 +104,7 @@ worker.onmessage = (event: MessageEvent<Response>) => {
   switch (response.type) {
     case "model":
       showReadout(response);
-      preview.show(response.mesh);
+      preview.show(response.mesh, response.sectionMesh);
       enableDownloads(true);
       break;
     case "file": {
@@ -128,6 +130,10 @@ for (const format of ["step", "stl"] as const) {
     send({ params: current!, format });
   });
 }
+
+crossSection.addEventListener("change", () =>
+  preview.setCrossSection(crossSection.checked),
+);
 
 form.addEventListener("input", update);
 update();
