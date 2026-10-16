@@ -14,7 +14,7 @@ No outer or inner surface of the body SHALL lean more than 35° from vertical, m
 - **THEN** the front sphere meets the cone at a polar angle of 55° from the axis, where its surface leans 35° from vertical, and the cone keeps that slope until it meets the spherical cap of diameter d + 4 mm tangentially
 
 ### Requirement: Sealed thin wall
-The body SHALL have one closed internal cavity with its floor at height t and at least t of material separating it from the exterior and screw hole. Before applying mount closures, the body cavity SHALL be the inward offset by t of the pontoon without its mount, including a concentric tangent nose sphere of radius R − t, where R = (d + 4 mm) / 2. Body walls SHALL be exactly t where the cavity follows this offset. No additional cavity-roof cone SHALL narrow it. At 0°, 30° and 45° the cavity SHALL continue into the wider lower mount, with cylindrical wall thickness t and a closure at least t thick before the seating shoulder. At 60° and 90° the wider lower mount SHALL be solid. The entire 20 mm insertion peg SHALL be solid apart from its screw hole.
+The body SHALL have one closed internal cavity with its floor at height t and at least t of material separating it from the exterior and screw hole. Before applying mount closures, the body cavity SHALL be the inward offset by t of the pontoon without its mount, including a concentric tangent nose sphere of radius R − t, where R = (d + 4 mm) / 2. Body walls SHALL be exactly t where the cavity follows this offset. At 0°, 30° and 45° the cavity SHALL continue into the wider lower mount, with cylindrical wall thickness t and a closure at least t thick before the seating shoulder. At 60° and 90° the wider lower mount SHALL be solid. The entire 20 mm insertion peg SHALL be solid apart from its screw hole.
 
 #### Scenario: Cavity is closed
 - **WHEN** a pontoon is generated with any valid parameters
@@ -37,11 +37,6 @@ The body SHALL have one closed internal cavity with its floor at height t and at
 - **WHEN** either mount type is generated at 60° or 90°
 - **THEN** the entire wider lower cylinder is solid, the body remains hollow and its cavity does not enter either mount cylinder
 
-#### Scenario: Body roof reference is independent of the sideways screw hole
-- **WHEN** D = 32 mm, L = 180 mm, t = 1.2 mm, mount type is "inside pipe", angle is 90° and clearance is 0.2 mm
-- **THEN** the inner nose is a spherical cap concentric with the outer nose, of radius 8.60 mm and top at z = c + R − t ≈ 171.51 mm, while both mount cylinders remain solid apart from the peg's screw hole
-- **AND** screw-hole height does not change the body cavity profile
-
 #### Scenario: Uniform front dome and cone
 - **WHEN** either mount type is generated with any offered wall thickness
 - **THEN** the cavity follows the front body sphere and its tangent cone at normal distance t wherever those surfaces are away from the mount closure
@@ -50,3 +45,4 @@ The body SHALL have one closed internal cavity with its floor at height t and at
 #### Scenario: Tangent inner nose sphere
 - **WHEN** either mount type is generated at 90° with any offered wall thickness
 - **THEN** the inner nose sphere has the same centre as the outer nose sphere, radius R − t, and a tangent join to the inner cone on the side clear of the solid mount
+- **AND** for the default pipe body at t = 1.2 mm the inner tip is at z = c + R − t ≈ 171.51 mm, with both mount cylinders solid apart from the peg's screw hole
