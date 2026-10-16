@@ -8,12 +8,14 @@ import {
 import {
   OVERHANG,
   frontCentre,
+  jointDiameter,
   mountDiameter,
   mountStart,
   rearCentre,
+  seating,
   type Params,
 } from "./profile";
-import { HOLE_DIAMETER, HOLE_FROM_START, MOUNT_LENGTH } from "./settings";
+import { HOLE_DIAMETER, HOLE_FROM_SHOULDER, PEG_LENGTH } from "./settings";
 
 type Vec = [number, number, number];
 
@@ -51,27 +53,28 @@ function outline(p: Params, radius: number, floor: number) {
 const revolve = (drawing: Drawing) =>
   drawing.sketchOnPlane("XZ").revolve() as Shape3D;
 
+const along = (start: Vec, direction: Vec, distance: number): Vec => [
+  start[0] + distance * direction[0],
+  start[1] + distance * direction[1],
+  start[2] + distance * direction[2],
+];
+
+// The mount pivot is the enlarged nose sphere's centre; its axis tilts from
+// the body axis by the mount angle.
 function mountAxis(p: Params) {
-  const r = mountDiameter(p.mountType) / 2;
   const a = (p.angle * Math.PI) / 180;
   return {
-    radius: r,
-    start: [0, 0, mountStart(p.length, r)] as Vec,
+    radius: jointDiameter(p.mountType) / 2,
+    start: [0, 0, mountStart(p.length, jointDiameter(p.mountType) / 2)] as Vec,
     direction: [Math.sin(a), 0, Math.cos(a)] as Vec,
   };
 }
 
-// Point where the screw hole's axis crosses the mount axis.
+// Point where the screw hole's axis crosses the mount axis, 10 mm along the
+// mount from the seating shoulder toward the peg's free end.
 function holeCentre(p: Params): Vec {
-  const { radius, start, direction } = mountAxis(p);
-  // Preserve the old cone-to-mount flush reference as the pivot moves back
-  // to the tangent sphere centre. This distance tilts with the mount.
-  const distance = HOLE_FROM_START + radius * (1 / SIN - 1 / TAN);
-  return [
-    start[0] + distance * direction[0],
-    0,
-    start[2] + distance * direction[2],
-  ];
+  const { start, direction } = mountAxis(p);
+  return along(start, direction, seating(p) + HOLE_FROM_SHOULDER);
 }
 
 export function screwHole(p: Params): Shape3D {
@@ -86,7 +89,7 @@ export function screwHole(p: Params): Shape3D {
 }
 
 export function buildBody(p: Params): Shape3D {
-  const r = mountDiameter(p.mountType) / 2;
+  const r = jointDiameter(p.mountType) / 2;
   const centre = mountStart(p.length, r);
   const mid = (OVERHANG + Math.PI / 2) / 2;
   return revolve(
@@ -100,33 +103,49 @@ export function buildBody(p: Params): Shape3D {
   );
 }
 
+// Wider lower cylinder from the pivot to the seating shoulder, then the solid
+// insertion peg.
+function buildMount(p: Params): Shape3D {
+  const { radius, start, direction } = mountAxis(p);
+  const shoulder = along(start, direction, seating(p));
+  const peg = mountDiameter(p.mountType) / 2;
+  return makeCylinder(radius, seating(p), start, direction).fuse(
+    makeCylinder(peg, PEG_LENGTH, shoulder, direction),
+  );
+}
+
 // The inward offset of the body, capped by a 35° cone on the body axis whose
-// point is t below the screw hole's lowest point or the rounded nose tip,
-// whichever is lower. This keeps the cavity roof at 35° rather than following
-// the steeper end of the spherical cap. Cut the cap from the outline before
-// revolving, because the kernel's solid intersection of the two returns nothing.
+// point is one wall thickness below the enlarged nose tip. At 0°, 30° and 45°
+// the cavity continues into the wider lower mount as a coaxial void and is
+// trimmed one wall thickness before the shoulder; at 60° and 90° both mount
+// cylinders are excluded so the lower mount stays solid. Cut the cap from the
+// outline before revolving, because the kernel's solid intersection of the two
+// returns nothing.
 export function buildCavity(p: Params): Shape3D {
-  const r = mountDiameter(p.mountType) / 2;
-  const tip = Math.min(
-    holeCentre(p)[2] - HOLE_DIAMETER / 2,
-    mountStart(p.length, r) + r,
-  ) - p.wall;
+  const radius = p.diameter / 2 - p.wall;
+  const r = jointDiameter(p.mountType) / 2;
+  const tip = mountStart(p.length, r) + r - p.wall;
   const cap = draw([-tip * TAN, 0])
     .hLineTo(tip * TAN)
     .lineTo([0, tip])
     .close();
-  const radius = p.diameter / 2 - p.wall;
   const offset = outline(p, radius, p.wall)
     .lineTo([0, frontCentre(p.diameter, p.length) + radius / SIN])
     .close();
-  return revolve(offset.intersect(cap));
+  const body = revolve(offset.intersect(cap));
+
+  if (p.angle > 45) return body.cut(buildMount(p));
+
+  const { start, direction } = mountAxis(p);
+  const shoulder = along(start, direction, seating(p));
+  const voidSolid = makeCylinder(r - p.wall, seating(p), start, direction);
+  const beyond = makeCylinder(1000, 1000, along(shoulder, direction, -p.wall), direction);
+  return body.fuse(voidSolid).cut(beyond);
 }
 
 // Body and mount with the screw hole, before hollowing.
 function buildOuter(p: Params): Shape3D {
-  const { radius, start, direction } = mountAxis(p);
-  const mount = makeCylinder(radius, MOUNT_LENGTH, start, direction);
-  return buildBody(p).fuse(mount).cut(screwHole(p));
+  return buildBody(p).fuse(buildMount(p)).cut(screwHole(p));
 }
 
 export function buildPontoon(p: Params): Shape3D {
