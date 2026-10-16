@@ -315,15 +315,17 @@ describe.each([0, 30, 45, 60, 90] as number[])("%s° mount", (angle) => {
       expect(measureVolume(hardwareWall(p, 0.5).intersect(pontoon))).toBeGreaterThan(0.1);
     });
 
-    test("screw hole stays at least one wall thickness from the cavity", () => {
-      expect(measureDistanceBetween(screwHole(p), buildCavity(p))).toBeGreaterThanOrEqual(p.wall - 1e-6);
+    test.each([0.8, 1.2, 1.6])("screw hole stays at least one wall thickness from the cavity, t = %s", (wall) => {
+      const q = params({ mountType, angle, wall });
+      expect(measureDistanceBetween(screwHole(q), buildCavity(q))).toBeGreaterThanOrEqual(q.wall - 1e-6);
     });
 
-    test("keeps at least one wall thickness from the actual exterior", () => {
-      const cavity = buildCavity(p);
-      const outer = buildBody(p).fuse(mountSolid(p));
+    test.each([0.8, 1.2, 1.6])("keeps at least one wall thickness from the actual exterior, t = %s", (wall) => {
+      const q = params({ mountType, angle, wall });
+      const cavity = buildCavity(q);
+      const outer = buildBody(q).fuse(mountSolid(q));
       const gap = Math.min(...outer.faces.map((face) => measureDistanceBetween(cavity, face)));
-      expect(gap).toBeGreaterThanOrEqual(p.wall - 1e-6);
+      expect(gap).toBeGreaterThanOrEqual(q.wall - 1e-6);
     });
   });
 });
