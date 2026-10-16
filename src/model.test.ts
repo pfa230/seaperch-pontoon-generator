@@ -1,10 +1,11 @@
 import init from "replicad-opencascadejs";
-import { getOC, measureDistanceBetween, setOC, type Shape3D } from "replicad";
+import { getOC, measureDistanceBetween, measureVolume, setOC, type Shape3D } from "replicad";
 import { beforeAll, describe, expect, test } from "vitest";
 import {
   buildBody,
   buildCavity,
   buildPontoon,
+  cutAwayHalf,
   exportPontoon,
   measure,
   screwHole,
@@ -34,6 +35,15 @@ const planarFaces = (shape: Shape3D) =>
       centre: face.center.toTuple(),
       normal: face.normalAt().toTuple(),
     }));
+
+// Planar faces lying in the Y = 0 plane left by the lengthwise section cut.
+const sectionFaces = (shape: Shape3D) =>
+  shape.faces.filter(
+    (face) =>
+      face.geomType === "PLANE" &&
+      Math.abs(face.center.y) < 1e-6 &&
+      Math.abs(Math.abs(face.normalAt().y) - 1) < 1e-6,
+  );
 
 describe.each(["pipe", "fitting"] as MountType[])("%s rounded nose", (mountType) => {
   test("has body sphere, tangent cone and mount-sized spherical sector", () => {
@@ -121,6 +131,15 @@ describe("default pontoon", () => {
     expect(Math.min(...zs)).toBeCloseTo(0, 2);
     expect(Math.max(...zs)).toBeCloseTo(191.40, 2);
   });
+
+  test("returns a section mesh of the retained Y >= 0 half", () => {
+    const { sectionMesh } = measure(DEFAULTS);
+    const vertexCount = sectionMesh.vertices.length / 3;
+    expect(sectionMesh.triangles.length % 3).toBe(0);
+    expect(Math.max(...sectionMesh.triangles)).toBeLessThan(vertexCount);
+    const ys = Array.from({ length: vertexCount }, (_, i) => sectionMesh.vertices[3 * i + 1]);
+    expect(Math.min(...ys)).toBeGreaterThanOrEqual(-1e-3);
+  });
 });
 
 describe.each([0, 30, 45, 60, 90] as number[])("%s° mount", (angle) => {
@@ -147,6 +166,38 @@ describe.each([0, 30, 45, 60, 90] as number[])("%s° mount", (angle) => {
     test("screw hole stays at least one wall thickness from the cavity", () => {
       const p = params({ mountType, angle });
       expect(measureDistanceBetween(screwHole(p), buildCavity(p))).toBeGreaterThanOrEqual(p.wall - 1e-6);
+    });
+  });
+});
+
+describe.each([0, 30, 45, 60, 90] as number[])("%s° cross-section", (angle) => {
+  describe.each(["pipe", "fitting"] as MountType[])("%s", (mountType) => {
+    test("retains the Y >= 0 half with a section face through the axes", () => {
+      const p = params({ mountType, angle });
+      const pontoon = buildPontoon(p);
+      const half = cutAwayHalf(pontoon);
+      expect(half.solids).toHaveLength(1);
+      const [low, high] = half.boundingBox.bounds;
+      expect(low[1]).toBeGreaterThanOrEqual(-1e-6);
+      expect(high[1]).toBeCloseTo(pontoon.boundingBox.bounds[1][1], 6);
+      // The hollow pontoon is symmetric about Y = 0, so half the material
+      // survives the cut with its cavity still open.
+      expect(measureVolume(half) / measureVolume(pontoon)).toBeCloseTo(0.5, 5);
+      const sections = sectionFaces(half);
+      expect(sections.length).toBeGreaterThan(0);
+      expect(sections.some((face) => face.innerWires().length > 0)).toBe(true);
+    });
+
+    test.each([
+      ["thin walls", { wall: 0.8 }],
+      ["thick walls", { wall: 1.6 }],
+    ] as [string, Partial<Params>][])("keeps the cavity open: %s", (_name, overrides) => {
+      const p = params({ mountType, angle, ...overrides });
+      const pontoon = buildPontoon(p);
+      const half = cutAwayHalf(pontoon);
+      expect(measureVolume(half) / measureVolume(pontoon)).toBeCloseTo(0.5, 5);
+      const sections = sectionFaces(half);
+      expect(sections.some((face) => face.innerWires().length > 0)).toBe(true);
     });
   });
 });

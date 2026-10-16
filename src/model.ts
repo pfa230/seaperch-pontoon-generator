@@ -1,5 +1,6 @@
 import {
   draw,
+  makeBox,
   makeCylinder,
   measureVolume,
   type Drawing,
@@ -139,23 +140,44 @@ export interface ModelMesh {
   triangles: Uint32Array;
 }
 
-// Displaced volume in mL, material volume in cm³ and the outer solid as a
-// display mesh. The outer solid is built once and reused for both the volume
-// and the mesh; replicad's booleans leave their inputs intact.
-export function measure(p: Params) {
-  const outer = buildOuter(p);
-  const { vertices, normals, triangles } = outer.mesh({
+function toMesh(shape: Shape3D): ModelMesh {
+  const { vertices, normals, triangles } = shape.mesh({
     tolerance: 0.1,
     angularTolerance: 0.1,
   });
   return {
+    vertices: new Float32Array(vertices),
+    normals: new Float32Array(normals),
+    triangles: new Uint32Array(triangles),
+  };
+}
+
+// The Y >= 0 half of a hollow pontoon, cut lengthwise through the body and
+// mount axes. The cutter is sized from the solid's bounds so it removes the
+// full Y < 0 half at every mount angle while leaving the section face at Y = 0.
+export function cutAwayHalf(pontoon: Shape3D): Shape3D {
+  const [low, high] = pontoon.boundingBox.bounds;
+  const margin = 1;
+  return pontoon.cut(
+    makeBox(
+      [low[0] - margin, low[1] - margin, low[2] - margin],
+      [high[0] + margin, 0, high[2] + margin],
+    ),
+  );
+}
+
+// Displaced volume in mL, material volume in cm³ and the outer solid as a
+// display mesh. The outer solid is built once and reused for both the volume
+// and the mesh; replicad's booleans leave their inputs intact. The hollow
+// solid is reused for material volume and the lengthwise half-section.
+export function measure(p: Params) {
+  const outer = buildOuter(p);
+  const hollow = outer.cut(buildCavity(p));
+  return {
     displaced: measureVolume(outer) / 1000,
-    material: measureVolume(outer.cut(buildCavity(p))) / 1000,
-    mesh: {
-      vertices: new Float32Array(vertices),
-      normals: new Float32Array(normals),
-      triangles: new Uint32Array(triangles),
-    } satisfies ModelMesh,
+    material: measureVolume(hollow) / 1000,
+    mesh: toMesh(outer),
+    sectionMesh: toMesh(cutAwayHalf(hollow)),
   };
 }
 
