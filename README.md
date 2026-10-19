@@ -54,4 +54,4 @@ In the dashboard, open Workers & Pages > `seaperch-pontoon-generator` > Deployme
 
 ## Development
 
-Changes go through OpenSpec and [openspec-loop](https://github.com/pfa230/openspec-loop): propose with `/opsx:propose` or `/openspec-scope`, then run `loop run <change>`. Loop settings are in `openspec/loop.yaml`.
+Changes go through OpenSpec and [openspec-loop](https://github.com/pfa230/openspec-loop): propose with `/opsx:propose` or `/loop-scope`, then run `loop run <change>`. Loop settings are in `openspec/loop.yaml`.
